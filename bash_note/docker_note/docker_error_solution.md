@@ -29,4 +29,4 @@ docker run -d -p 8000:8000 --name fastapi-app fastapi:latest
 Docker is a powerful tool, but dealing with permission issues like this can be a real pain. Fortunately, the solution is simple: by adding your user to the `docker` group and adjusting permissions, you can avoid needing `sudo` for every Docker command.
 
 
-ref:https://medium.com/@wrefordmessi/how-to-fix-permission-denied-while-trying-to-connect-to-the-docker-daemon-socket-48933b9da2f4
+> ref:https://medium.com/@wrefordmessi/how-to-fix-permission-denied-while-trying-to-connect-to-the-docker-daemon-socket-48933b9da2f4
