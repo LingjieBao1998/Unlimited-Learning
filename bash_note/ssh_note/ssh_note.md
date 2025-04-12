@@ -213,7 +213,7 @@ scp user@remote_host:/home/user/example.txt .
 ```
 
 ### 从远程主机复制文件夹到本地
-如果你想将远程主机上的文件 example.txt 复制到本地的当前目录，可以使用以下命令：
+如果你想将远程主机上的文件夹 example 复制到本地的当前目录，可以使用以下命令：
 ```bash
 scp -r user@remote_host:/home/user/example .
 ```
