@@ -113,7 +113,7 @@ Hello, Flask on port 3003!
 ```bash
 ssh ${USER}@localhost
 ```
-
+> 与前面的http的服务反向代理相比，需要验证下用户是否能登入
 
 如果不能登入，检查`/etc/ssh/sshd_config`文件并确保下列配置
 ```file
@@ -214,5 +214,5 @@ scp user@remote_host:/home/user/example.txt .
 ### 从远程主机复制文件夹到本地
 如果你想将远程主机上的文件 example.txt 复制到本地的当前目录，可以使用以下命令：
 ```bash
-scp -r user@remote_host:/home/user/example.txt .
+scp -r user@remote_host:/home/user/example .
 ```
