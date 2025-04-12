@@ -189,7 +189,7 @@ Host local-machine
     User 本地用户
     ProxyCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -W %h:%p jump-server
 ```
-
+> ref:https://blog.csdn.net/weixin_42096901/article/details/105193366
 
 
 ## scp
