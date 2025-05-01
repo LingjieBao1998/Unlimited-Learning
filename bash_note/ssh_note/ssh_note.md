@@ -121,7 +121,15 @@ ssh ${USER}@localhost
 PermitRootLogin yes  # 允许 root 用户通过 SSH 登录，通常建议在必要时启用此选项以增加安全性(如果不是root登入可忽略)
 PasswordAuthentication yes  # 允许使用密码进行身份验证，建议在不使用公钥认证时谨慎启用
 ```
-然后重启ssh服务
+> `PermitRootLogin yes` 是SSH服务器配置中的一个选项，用于控制是否允许root用户通过SSH登录系统。可选值及含义
+* `yes`：允许root用户通过SSH登录系统，可以使用密码或公钥身份验证。
+* `no`：禁止root用户通过SSH登录系统。这是一种安全措施，可以防止未经授权的用户直接使用root权限登录到服务器。
+* `without-password`：只允许root用户使用公钥身份验证登录，禁止使用密码登录。
+* `prohibit-password`：只允许root用户使用公钥身份验证登录，禁止使用密码登录。与without-password相同，但更推荐使用这个选项，因为它提供了更明确的语义。
+> 安全建议:在实际应用中，为了增加系统的安全性，通常推荐将`PermitRootLogin`的值设置为`prohibit-password`或`without-password`，并使用公钥身份验证登录root用户。这样可以避免使用密码登录root用户所带来的安全风险。如果确实需要允许root用户使用密码登录系统，可以将该值设置为yes，但要格外注意密码的安全性。
+
+> ref:https://blog.csdn.net/xie__jin__cheng/article/details/142655337
+
 ```bash
 systemctl restart ssh
 ```
