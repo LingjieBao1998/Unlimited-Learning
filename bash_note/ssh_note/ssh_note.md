@@ -199,6 +199,21 @@ Host local-machine
 ```
 > ref:https://blog.csdn.net/weixin_42096901/article/details/105193366
 
+### SSH反向代理掉线解决方案
+
+```bash
+#!/bin/bash
+while true;do
+    RET=`ps ax | grep "ssh -NfR 5007:localhost:3003" | grep -v "grep"`
+    if [ "$RET" = "" ]; then
+        echo "restart ssh server"
+        ssh -NfR 5007:localhost:3003 user@119.1.2.3
+    fi
+    sleep 10
+done
+```
+
+
 
 ## scp
 在 Linux 系统中，scp 命令是一个非常实用的工具 scp 是 "secure copy" 的缩写，它基于 SSH（Secure Shell）协议，确保数据传输的安全性。
