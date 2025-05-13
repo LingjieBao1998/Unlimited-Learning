@@ -91,8 +91,62 @@ $L_{total}=\sum_{s,i.j,k}(\lambda_{cls}L_{cls}+\lambda_{box}L_{box}+\lambda_{kpt
 即使在低分辨率场景下，`YOlo-pose`模型仍然优于现有的模型
 
 > GMACS (Giga Multiply-Add Operations per Second):（每秒千兆乘法累加运算），是用于衡量深度学习模型计算效率的指标。 它表示每秒在模型中执行的乘法累加运算的数量，以每秒十亿 (giga) 表示。$$GMACS =（乘法累加运算次数）/（10^{9}）$$。乘加运算的数量通常通过分析网络架构和模型参数的维度来确定，例如权重和偏差。通过 GMACS 指标，研究人员和从业者可以就模型选择、硬件要求和优化策略做出明智的决策，以实现高效且有效的深度学习计算。
+```python
+import torchvision.models as models
+import torch
+from ptflops import get_model_complexity_info
+import re
 
+#Model thats already available
+net = models.densenet161()
+macs, params = get_model_complexity_info(net, (3, 224, 224), as_strings=True,
+print_per_layer_stat=True, verbose=True)
+# Extract the numerical value
+flops = eval(re.findall(r'([\d.]+)', macs)[0])*2
+# Extract the unit
+flops_unit = re.findall(r'([A-Za-z]+)', macs)[0][0]
 
+print('Computational complexity: {:<8}'.format(macs))
+print('Computational complexity: {} {}Flops'.format(flops, flops_unit))
+print('Number of parameters: {:<8}'.format(params))
+```
+
+```python
+import os
+import torch
+from torch import nn
+
+class NeuralNetwork(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.linear_relu_stack = nn.Sequential(
+            nn.Linear(28*28, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10),
+        )
+
+    def forward(self, x):
+        x = self.flatten(x)
+        logits = self.linear_relu_stack(x)
+        return logits
+    
+custom_net = NeuralNetwork()
+
+macs, params = get_model_complexity_info(custom_net, (28, 28), as_strings=True,
+                                        print_per_layer_stat=True, verbose=True)
+# Extract the numerical value
+flops = eval(re.findall(r'([\d.]+)', macs)[0])*2
+
+# Extract the unit
+flops_unit = re.findall(r'([A-Za-z]+)', macs)[0][0]
+print('Computational complexity: {:<8}'.format(macs))
+print('Computational complexity: {} {}Flops'.format(flops, flops_unit))
+print('Number of parameters: {:<8}'.format(params))
+```
+> ref:https://medium.com/@ajithkumarv/how-to-calculate-gmac-and-gflops-with-python-62004a753e3b
 
 
 ## 其他
