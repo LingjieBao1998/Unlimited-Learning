@@ -91,6 +91,10 @@ $L_{total}=\sum_{s,i.j,k}(\lambda_{cls}L_{cls}+\lambda_{box}L_{box}+\lambda_{kpt
 即使在低分辨率场景下，`YOlo-pose`模型仍然优于现有的模型
 
 > GMACS (Giga Multiply-Add Operations per Second):（每秒千兆乘法累加运算），是用于衡量深度学习模型计算效率的指标。 它表示每秒在模型中执行的乘法累加运算的数量，以每秒十亿 (giga) 表示。$$GMACS =（乘法累加运算次数）/（10^{9}）$$。乘加运算的数量通常通过分析网络架构和模型参数的维度来确定，例如权重和偏差。通过 GMACS 指标，研究人员和从业者可以就模型选择、硬件要求和优化策略做出明智的决策，以实现高效且有效的深度学习计算。
+```bash
+pip install ptflops
+```
+
 ```python
 import torchvision.models as models
 import torch
