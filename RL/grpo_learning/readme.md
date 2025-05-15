@@ -51,6 +51,10 @@ LookupError:
 ```
 
 ## 实现细节&重要参数（待添加）
+### 运行
+```bash
+python grpo_encoder_decoder_summarization.py
+```
 
 
 
