@@ -50,4 +50,5 @@ LookupError:
 
 ## 建议
 先进行`SFT`微调，再进行`GRPO`微调
+<img src="assets/grpo_advice.png" alert="grpo_advice"></img>
 > ref:https://rabiloo.com/blog/fine-tuning-a-reasoning-model-with-grpo-for-passport-data-extraction
