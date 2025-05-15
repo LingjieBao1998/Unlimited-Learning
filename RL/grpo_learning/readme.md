@@ -1,7 +1,9 @@
 ## 参考
-> <a href="./grpo_encoder_decoder_summarization.py">`grpo_encoder_decoder_summarization`</a>：https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71 
-> `Image_Caption_GRPO`:https://github.com/liangxu-one/ms-models/blob/image_caption_grpo/research/arxiv_papers/Image_Caption_GRPO/train_with_grpo.py#L150(有些包不好安装)
-> <a href="./Medical_QA_Bart_w_GRPO_Fine-Tuning.py">`SFT+GRPO 混合训练`</a>:https://www.kaggle.com/code/stpeteishii/medical-qa-bart-w-grpo-fine-tuning（没有KL 散度限制）
+> `grpo_encoder_decoder_summarization`：https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71 —— <a href="./grpo_encoder_decoder_summarization.py">grpo_encoder_decoder_summarization.py</a>
+> 
+> `Image_Caption_GRPO`:https://github.com/liangxu-one/ms-models/blob/image_caption_grpo/research/arxiv_papers/Image_Caption_GRPO/train_with_grpo.py (有些包不好安装,没有实现,不过代码的细节翔实)
+> 
+> `SFT+GRPO 混合训练`:https://www.kaggle.com/code/stpeteishii/medical-qa-bart-w-grpo-fine-tuning（没有KL 散度限制）——<a href="./Medical_QA_Bart_w_GRPO_Fine-Tuning.py">Medical_QA_Bart_w_GRPO_Fine-Tuning.py</a>
 
 > 本文主要围绕第一个教程进行展开
 
