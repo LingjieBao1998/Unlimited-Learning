@@ -7,7 +7,8 @@
 
 ## markush数据集
 ```md
-https://huggingface.co/datasets/AI4Industry/MolParser-7M?library=datasets
+'MolParser-7M':https://huggingface.co/datasets/AI4Industry/MolParser-7M?library=datasets
+'MarkushGrapher-Datasets':https://huggingface.co/datasets/ds4sd/MarkushGrapher-Datasets
 ```
 
 ## img2mol数据集
