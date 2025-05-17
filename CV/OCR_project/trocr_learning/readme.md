@@ -19,3 +19,8 @@ cd IAM/image && for fname in `ls *.png`; do echo -e "$fname\t${fname:0:5}" >> ..
 ```
 pip install sentencepiece
 ```
+
+## run
+```bash
+python main.py
+```
