@@ -6,6 +6,8 @@
 
 > https://medium.com/data-science/how-to-improve-your-image-classifier-with-googles-autoaugment-77643f0be0c9
 
+> 在线demo以及参数解释：https://explore.albumentations.ai/ ;https://explore.albumentations.ai/transform/GridDistortion
+
 ### case
 
 > ref:https://medium.com/@nimritakoul01/image-augmentations-with-albumentations-python-library-part1-823f99a3943a
