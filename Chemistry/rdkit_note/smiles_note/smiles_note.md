@@ -3,3 +3,6 @@ ref:https://github.com/IUPAC/IUPAC_SMILES_plus/tree/master
 
 ## the rule of markush
 ref:https://egonw.github.io/cdk-cxsmiles/
+
+## the rule of bigsmiles
+ref:https://olsenlabmit.github.io/BigSMILES/docs/line_notation.html#the-bigsmiles-line-notation
