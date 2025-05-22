@@ -1,7 +1,7 @@
 ## 介绍&动机
 目前主流的关键点检测方法有两大类
-* 自下而上的检测方法（`Top-down`）：首先进行使用目标检测模型获取目标的检测框，随后在对每个目标进行关键点检测。
-* 自上而下的检测方法（`bottom-up`），首先使用`heatmap regression`或者其他方法获取所有的关键点，随后通过后处理将关键点合并（group）到同一个检测对象中。
+* 自上而下的检测方法（`Top-down`）：首先进行使用目标检测模型获取目标的检测框，随后在对每个目标进行关键点检测。
+* 自下而上的检测方法（`bottom-up`），首先使用`heatmap regression`或者其他方法获取所有的关键点，随后通过后处理将关键点合并（group）到同一个检测对象中。
 
     这些关键点检测方法要么是两阶段的检测方法，要么以来复杂的（并且不通用的）后处理技术，为关键点检测的**实时性**和**准确性**带来了挑战。
     <img src="./img/yolo-pose.png" alert="yolo-pose.png"></img>
@@ -63,7 +63,7 @@ $L_{total}=\sum_{s,i.j,k}(\lambda_{cls}L_{cls}+\lambda_{box}L_{box}+\lambda_{kpt
 ### 关键点在box之外
 <img src="./img/yolo-pose-2.png" alert="yolo-pose-2.png"></img>
 
-虽然`YOLO-pose`的`bbox`不是很准，但是仍然成功将框外的关键点检测出来了
+虽然`YOLO-pose`的`bbox`不是很准，但是仍然成功将**框外的关键点**(`keypoint` out of bbox)检测出来了
 
 ### 在COCO数据集上的表现
 <img src="./img/yolo-pose-3.png" alert="yolo-pose-3.png"></img>
@@ -78,7 +78,7 @@ $L_{total}=\sum_{s,i.j,k}(\lambda_{cls}L_{cls}+\lambda_{box}L_{box}+\lambda_{kpt
 ### Ablation Study: OKS Loss vs L1 Loss. 
 <img src="./img/yolo-pose-5.png" alert="yolo-pose-5.png"></img>
 
-`OKS损失`是我们工作的主要贡献之一。由于这种损失与L1损失不同，是受约束的，因此训练动态更加稳定。在使用L1损失进行训练时，我们不得不稍微调整损失权重。在YOLv5s6_960上进行的测试表明，OKS损失显著优于L1损失。我们使用尺度归一化L1损失训练模型，以检查尺度不变性对损失公式的影响。
+`OKS损失函数`是我们工作的主要贡献之一。由于这种损失与`L1损失函数`不同，`OKS损失函数`是受约束的，因此训练动态更加稳定。在使用`L1损失函数`进行训练时，我们不得不稍微调整损失权重。在YOLv5s6_960上进行的测试表明，使用`OKS损失函数`模型性能显著优于使用`L1损失函数`。我们使用`尺度归一化L1损失函数`训练模型，以检查尺度不变性对损失公式的影响。
 
 ### Ablation Study: Across Resolution.(分辨率的影响)
 <img src="./img/yolo-pose-6.png" alert="yolo-pose-6.png"></img>
