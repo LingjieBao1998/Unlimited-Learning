@@ -1,11 +1,41 @@
-## 参考
-> `grpo_encoder_decoder_summarization`：https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71 —— <a href="./grpo_encoder_decoder_summarization.py">grpo_encoder_decoder_summarization.py</a>
-> 
-> `Image_Caption_GRPO`:https://github.com/liangxu-one/ms-models/blob/image_caption_grpo/research/arxiv_papers/Image_Caption_GRPO/train_with_grpo.py (有些包不好安装,没有实现,不过代码的细节翔实)
-> 
-> `SFT+GRPO 混合训练`:https://www.kaggle.com/code/stpeteishii/medical-qa-bart-w-grpo-fine-tuning（没有KL 散度限制）——<a href="./Medical_QA_Bart_w_GRPO_Fine-Tuning.py">Medical_QA_Bart_w_GRPO_Fine-Tuning.py</a>
+## GRPO简介
+GRPO的核心思想是通过组内相对奖励来估计基线（baseline），从而避免使用额外的价值函数模型（critic model）。传统的PPO算法需要训练一个**价值函数**来估计优势函数（advantage function），而GRPO通过从同一问题的多个输出中**计算平均奖励**来替代这一过程，显著减少了内存和计算资源的消耗。
 
-> 本文主要围绕第一个教程进行展开
+所以将GRPO迁移到其他领域，只需要对奖励函数进行修改和定义，可以是基于规则的奖励函数页可以是奖励模型所给出的奖励函数。（有一种大道至简的感觉）
+
+GRPO的训练流程
+1. 初始化
+* 策略模型$\pi_{\theta}$，通常是基于预训练之后的模型
+* 奖励模型$r_{\phi}$，对模型的输出进行评分
+* 参考模型$\pi_{ref}$，通常是基于预训练之后的模型，用于计算KL散度，防止策略模型过度偏离初始的模型（类似于正则化的作用）
+2.  采样输出
+对于输入：
+* 从当时模型$\pi_{old}$中采样一组输出${o_1, o_2, o_3,...,o_{G}}$,其中$G$是组的大小（比如$G=64$）
+* 使用奖励模型$r_{\phi}$对每个输出进行评分，得到对应的精力$r_i$
+3. 归一化奖励
+
+$$mean(r) = \frac{1}{G}\sum_{i=1}^{G}r_{i}$$
+$$std(r)=\sqrt{\frac{1}{G}\sum_{i=1}^{G}(r_{i}-mean(r))^2}$$
+$$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
+
+4. 计算优势函数
+对于每个输出$o_i$，每个时间步
+
+
+> ref：https://zhuanlan.zhihu.com/p/20021693569
+
+
+## 复现对比
+| 项目                                   | 链接                                                                                                           | 备注                                      | 推介指数 |
+|--------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------|----------|
+| `Image_Caption_GRPO`                 | [train_with_grpo.py](https://github.com/liangxu-one/ms-models/blob/image_caption_grpo/research/arxiv_papers/Image_Caption_GRPO/train_with_grpo.py) | 有些包不好安装, 没有实现,|     |
+| `SFT+GRPO 混合训练`                  | [Medical_QA_Bart_w_GRPO_Fine-Tuning.py](https://www.kaggle.com/code/stpeteishii/medical-qa-bart-w-grpo-fine-tuning) | 没有加KL散度限制，不一定有效                         |   |
+| `Minimal-GRPO`                       | [Minimal-GRPO:GitHub](https://github.com/Bharath2/Minimal-GRPO)                                                           | 出现`loss`的梯度为None的情况            |     |
+| `GRPO-Zero`                          | [GRPO-Zero:GitHub](https://github.com/policy-gradient/GRPO-Zero)                                                              | 数据和模型需要手动下载                  |     |
+| `The Hundred-Page Language Models Book` | [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov/theLMbook)                                                              | 没啥太大问题                           | √   |
+| `grpo_encoder_decoder_summarization` | [grpo_encoder_decoder_summarization.py](https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71) | 缺点，`old_model`拷贝了一份模型                             |  √  |   
+| `grpo_encoder_decoder_summarization_v2.py` | [grpo_encoder_decoder_summarization_v2.py](https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71) | 参照https://github.com/Bharath2/Minimal-GRPO, old_scores计算一次，current_scores计算4次，去除了`old_model` |  √  |   
+
 
 ## 报错
 ### nltk导入失败失败
@@ -57,8 +87,17 @@ python grpo_encoder_decoder_summarization.py
 ```
 
 
+## 问题
+* `Trl`的`GRPOTrainer`对动态生成的数据似乎不大友好
+ref:https://github.com/huggingface/trl/issues/2942
+
 
 ## 建议
 先进行`SFT`微调，再进行`GRPO`微调
 <img src="assets/grpo_advice.png" alert="grpo_advice"></img>
 > ref:https://rabiloo.com/blog/fine-tuning-a-reasoning-model-with-grpo-for-passport-data-extraction
+
+
+## 其他
+* GRPO的简单实现
+ref:https://zhuanlan.zhihu.com/p/22924256925

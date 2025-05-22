@@ -431,9 +431,9 @@ def train(
 
     # Prepare policies
     reference_model = deepcopy(model)
-    old_model = deepcopy(model)
+    # old_model = deepcopy(model)
     reference_model.eval()
-    old_model.eval()
+    # old_model.eval()
     model.train()
     ## 目前新旧模型的权重是一致的
 
@@ -464,7 +464,7 @@ def train(
     for _ in range(training_args.epochs):
         # Update the old policy
         ## old model是按照epoch进行更新
-        old_model.load_state_dict(model.state_dict(), strict=False)
+        # old_model.load_state_dict(model.state_dict(), strict=False)
         for batch in tqdm(train_dataloader, total=len(train_dataloader)):
             # Prepare the batch data
             input_ids = batch["input_ids"].to(model.device)
@@ -473,7 +473,8 @@ def train(
             effective_batch_size = input_ids.shape[0]
             
             # Generate ids with the old policy
-            generated_ids = old_model.generate(
+            model.eval() ## 新增
+            generated_ids = model.generate(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 max_new_tokens=training_args.max_new_tokens,
@@ -500,19 +501,6 @@ def train(
                 "cuda", dtype=torch.bfloat16
             ):
                 old_scores = compute_token_scores(
-                    old_model,
-                    encoder_input_ids=repeated_input_ids,
-                    encoder_attention_mask=repeated_attention_mask,
-                    decoder_input_ids=generated_ids,
-                    decoder_attention_mask=decoder_attention_mask,
-                    batch_size=effective_batch_size,
-                    group_size=training_args.group_size,
-                ) # [batch_size, training_args.group_size, max_len]
-
-            # Compute the sequence scores of the current policy
-            with torch.autocast("cuda", dtype=torch.bfloat16):
-                model.eval()
-                current_scores = compute_token_scores(
                     model,
                     encoder_input_ids=repeated_input_ids,
                     encoder_attention_mask=repeated_attention_mask,
@@ -520,9 +508,7 @@ def train(
                     decoder_attention_mask=decoder_attention_mask,
                     batch_size=effective_batch_size,
                     group_size=training_args.group_size,
-                )
-                model.train()
-
+                ) # [batch_size, training_args.group_size, max_len]
 
             # Compute the sequence scores of the reference model
             with torch.inference_mode(), torch.autocast(
@@ -548,35 +534,46 @@ def train(
                 repeats=training_args.group_size, dim=0
             ).view(effective_batch_size, training_args.group_size, -1)
 
-            ## 新旧模型的权重还是一致的
+            
             # Compute GRPO objective
             # 核心
-            with torch.autocast("cuda", dtype=torch.bfloat16):
-                grpo_output = grpo(
-                    generated_ids,
-                    old_scores,
-                    current_scores,
-                    reference_scores,
-                    labels,
-                    tokenizer,
-                    training_args.grpo_epsilon,
-                    training_args.grpo_beta,
+            # Compute the sequence scores of the current policy
+            ## 参照https://github.com/Bharath2/Minimal-GRPO, old_scores计算一次，current_scores计算4次
+            for temp_i in range(4):
+                with torch.autocast("cuda", dtype=torch.bfloat16):
+                    model.eval()
+                    current_scores = compute_token_scores(
+                        model,
+                        encoder_input_ids=repeated_input_ids,
+                        encoder_attention_mask=repeated_attention_mask,
+                        decoder_input_ids=generated_ids,
+                        decoder_attention_mask=decoder_attention_mask,
+                        batch_size=effective_batch_size,
+                        group_size=training_args.group_size,
+                    )
+                    model.train()
+
+                with torch.autocast("cuda", dtype=torch.bfloat16):
+                    grpo_output = grpo(
+                        generated_ids,
+                        old_scores,
+                        current_scores,
+                        reference_scores,
+                        labels,
+                        tokenizer,
+                        training_args.grpo_epsilon,
+                        training_args.grpo_beta,
+                    )
+
+                # Update the current policy
+                grpo_output.loss.backward()
+                clip_grad_norm_(
+                    model.parameters(),
+                    training_args.gradient_max_norm,
                 )
-
-            # Update the current policy
-            grpo_output.loss.backward()
-            clip_grad_norm_(
-                model.parameters(),
-                training_args.gradient_max_norm,
-            )
-            optimizer.step()
-            optimizer.zero_grad()
-            scheduler.step()
-
-            # Update old policy periodically
-            if (training_step + 1) % training_args.update_old_after == 0:
-                old_model.load_state_dict(model.state_dict(), strict=False)
-                torch.cuda.empty_cache()
+                optimizer.step()
+                optimizer.zero_grad()
+                scheduler.step()
 
             # Update log metrics
             batch_metrics = {

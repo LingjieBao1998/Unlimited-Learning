@@ -556,8 +556,7 @@ def generate_rollout_data(model, ref_model, tokenizer, batch_samples, num_genera
     prompts = [sample["prompt"] if isinstance(sample, dict) else sample[0] for sample in batch_samples]
     answers = [sample["answer"] if isinstance(sample, dict) else sample[1] for sample in batch_samples]
     
-    import ipdb
-    ipdb.set_trace()
+
     # Generate completions and associated masks.
     # We generate once, and then use the same completions to compute both sets of log probabilities.
     with torch.no_grad():
@@ -763,8 +762,6 @@ def train_with_grpo(model, tokenizer, train_data, num_iterations=1,
                     policy_model, reference_model, rollout_data, tokenizer,
                     reward_function, optimizer, beta, epsilon
                 )
-                import ipdb
-                ipdb.set_trace()
                 print(f"Iteration {iteration}/{num_iterations}, Step {step}/{steps_per_iteration}, "
                       f"GRPO update {grpo_iter}/{mu}, Loss: {loss_value:.4f}")
         
