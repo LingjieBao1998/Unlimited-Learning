@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import copy
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import BartForConditionalGeneration, BartTokenizer ## BART model
 from datasets import load_dataset
 
 def set_random_seed(seed: int = 42):
@@ -393,7 +394,7 @@ def selective_log_softmax(logits, input_ids):
     # Remove the extra last dimension to get back to shape (batch_size, seq_len).
     return selected_log_probs.squeeze(-1)
 
-def compute_log_probabilities(model, input_ids, attention_mask, logits_to_keep):
+def compute_log_probabilities(model, input_ids, attention_mask, decoder_input_ids, decoder_attention_mask, logits_to_keep):
     """
     Compute per-token log probabilities for a subset of tokens (typically the completion tokens).
 
@@ -416,24 +417,38 @@ def compute_log_probabilities(model, input_ids, attention_mask, logits_to_keep):
         4. Finally, we use the selective_log_softmax to compute log probabilities only for those tokens.
     """
     # Run the model forward pass and obtain logits.
-    logits = model(
+    # logits = model(
+    #     input_ids=input_ids,
+    #     attention_mask=attention_mask,
+    #     logits_to_keep=logits_to_keep + 1  # Request one extra logit for proper alignment.
+    # ).logits  # Shape: (batch_size, total_seq_len, vocab_size)
+    ## 修改为encoder-decoder的前向模式
+    logits = model.forward(
         input_ids=input_ids,
         attention_mask=attention_mask,
-        logits_to_keep=logits_to_keep + 1  # Request one extra logit for proper alignment.
-    ).logits  # Shape: (batch_size, total_seq_len, vocab_size)
-
+        decoder_input_ids=decoder_input_ids,
+        decoder_attention_mask=decoder_attention_mask,
+        use_cache=False,
+    ).logits
     # Remove the last logit as it does not have a corresponding target token.
+    logits = logits[:, -(logits_to_keep + 1):, :]
     logits = logits[:, :-1, :]  # New shape: (batch_size, total_seq_len - 1, vocab_size)
 
     # Slice the input_ids to keep only the last logits_to_keep tokens.
     # This corresponds to the generated completion tokens.
-    input_ids = input_ids[:, -logits_to_keep:]  # Shape: (batch_size, logits_to_keep)
+    # input_ids = input_ids[:, -logits_to_keep:]  # Shape: (batch_size, logits_to_keep)
+    ## 修改为input_ids为decoder_input_ids
+    decoder_input_ids = decoder_input_ids[:, -logits_to_keep:]
+    
 
     # Also slice the logits to keep only those corresponding to the completion tokens.
     logits = logits[:, -logits_to_keep:, :]  # Shape: (batch_size, logits_to_keep, vocab_size)
 
     # Compute and return the log probabilities for the selected tokens.
-    return selective_log_softmax(logits, input_ids)
+    # return selective_log_softmax(logits, input_ids)
+    ## 修改input_ids为decoder_input_ids
+    return selective_log_softmax(logits, decoder_input_ids)
+
 
 def create_completion_mask(completion_ids, eos_token_id):
     """
@@ -499,11 +514,12 @@ def generate_completions(model, tokenizer, prompts, num_generations=4, max_compl
         4. The generated output contains the prompt followed by the completion; we remove the prompt part to get the completions.
         5. A mask is created (via create_completion_mask) so that only tokens up to the first EOS are considered.
     """
-    device = next(model.parameters()).device
+    device = model.device
 
     # Tokenize the list of prompts with padding. The padding_side="left" ensures alignment on the right.
-    tokenizer.padding_side  = "left"
-    inputs = tokenizer(prompts, return_tensors="pt", padding=True, padding_side="left")
+    ## 修改padding为"right"，如果是decoder-only的模型，请用"left"
+    tokenizer.padding_side  = "right"
+    inputs = tokenizer(prompts, return_tensors="pt", padding=True, padding_side="right")
     prompt_ids = inputs["input_ids"].to(device)      # Shape: (batch_size, prompt_seq_len)
     prompt_mask = inputs["attention_mask"].to(device)  # Shape: (batch_size, prompt_seq_len)
     prompt_length = prompt_ids.size(1)  # Save the prompt length to later separate prompt from completion.
@@ -512,22 +528,28 @@ def generate_completions(model, tokenizer, prompts, num_generations=4, max_compl
     prompt_ids = prompt_ids.repeat_interleave(num_generations, dim=0)   # New shape: (batch_size*num_generations, prompt_seq_len)
     prompt_mask = prompt_mask.repeat_interleave(num_generations, dim=0) # New shape: (batch_size*num_generations, prompt_seq_len)
 
+
     # Generate new tokens for each prompt. The output includes the original prompt and the generated tokens.
+    ## 没有梯度（TODO）
     outputs = model.generate(
-        prompt_ids,
+        input_ids = prompt_ids,
         attention_mask=prompt_mask,
-        max_new_tokens=max_completion_length,
+        max_length=max_completion_length, ## 修改max_new_tokens为
         do_sample=True,
         temperature=1.0,
         pad_token_id=tokenizer.pad_token_id,
-        eos_token_id=tokenizer.eos_token_id
+        eos_token_id=tokenizer.eos_token_id,
+        decoder_start_token_id=tokenizer.bos_token_id # 新增decoder_start_token_id
     )
 
     # Remove the prompt portion from the generated output to isolate the completion tokens.
-    completion_ids = outputs[:, prompt_length:]  # Shape: (batch_size*num_generations, completion_seq_len)
+    ## 修改completion_ids
+    # completion_ids = outputs[:, prompt_length:]  # Shape: (batch_size*num_generations, completion_seq_len)
+    completion_ids = outputs[:, :] 
 
     # Create a binary mask that ignores tokens beyond the first EOS token.
-    completion_mask = create_completion_mask(completion_ids, tokenizer.eos_token_id)
+    ## 修改tokenizer.eos_token_id为tokenizer.pad_token_id
+    completion_mask = create_completion_mask(completion_ids, tokenizer.pad_token_id)
 
     return prompt_ids, prompt_mask, completion_ids, completion_mask
 
@@ -547,28 +569,45 @@ def generate_rollout_data(model, ref_model, tokenizer, batch_samples, num_genera
     Returns:
         A dictionary with rollout data including both old and reference log probabilities.
     """
-    tokenizer.padding_side  = "left"
-    device = next(model.parameters()).device
+    ## 修改tokenizer的padding为right
+    tokenizer.padding_side  = "right"
+    device = model.device
 
     # Extract prompts and answers.
     prompts = [sample["prompt"] if isinstance(sample, dict) else sample[0] for sample in batch_samples]
     answers = [sample["answer"] if isinstance(sample, dict) else sample[1] for sample in batch_samples]
-    
+
     # Generate completions and associated masks.
     # We generate once, and then use the same completions to compute both sets of log probabilities.
     with torch.no_grad():
+        ## prompt_ids对应encoder-decoder的input_id, prompt_mask对应attention_mask
         prompt_ids, prompt_mask, completion_ids, completion_mask = generate_completions(
             model, tokenizer, prompts, num_generations, max_completion_length
         )
-        input_ids = torch.cat([prompt_ids, completion_ids], dim=1)
-        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
+
+        # input_ids = torch.cat([prompt_ids, completion_ids], dim=1)
+        # attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
+
+        ## 修改prompt_ids为start_id
+        start_input_ids = tokenizer.bos_token_id * torch.ones(
+            [completion_ids.shape[0], 1]
+        ).long().to(device)
+        start_mask = torch.ones([completion_ids.shape[0], 1]).long().to(device)
+        ## 修改input_ids为decoder_input_ids；attention_mask为decoder_attention_mask
+        decoder_input_ids = torch.cat([start_input_ids, completion_ids], dim=1)
+        decoder_attention_mask = torch.cat([start_mask, completion_mask], dim=1)
+        
         logits_to_keep = completion_ids.size(1)
 
         # Compute old_log_probs from the current model, with gradients disabled.
-        old_log_probs = compute_log_probabilities(model, input_ids, attention_mask, logits_to_keep)
-        
+        # old_log_probs = compute_log_probabilities(model, input_ids, attention_mask, logits_to_keep)
+        ## 新增decoder_input_ids和decoder_attention_mask
+        old_log_probs = compute_log_probabilities(model, prompt_ids, prompt_mask, decoder_input_ids, decoder_attention_mask, logits_to_keep)
+
         # Compute ref_log_probs from the reference model, which remains static.
-        ref_log_probs = compute_log_probabilities(ref_model, input_ids, attention_mask, logits_to_keep)
+        # ref_log_probs = compute_log_probabilities(ref_model, input_ids, attention_mask, logits_to_keep)
+        ## 新增decoder_input_ids和decoder_attention_mask
+        ref_log_probs = compute_log_probabilities(ref_model, prompt_ids, prompt_mask, decoder_input_ids, decoder_attention_mask, logits_to_keep)
 
     formatted_completions = [
         [{'content': tokenizer.decode(ids, skip_special_tokens=True)}]
@@ -578,8 +617,10 @@ def generate_rollout_data(model, ref_model, tokenizer, batch_samples, num_genera
     repeated_answers = [a for a in answers for _ in range(num_generations)]
 
     return {
-        "input_ids": input_ids,
-        "attention_mask": attention_mask,
+        "prompt_ids": prompt_ids, ## 新增
+        "prompt_mask": prompt_mask, ## 新增
+        "decoder_input_ids": decoder_input_ids, ## 修改input_ids为decoder_input_ids
+        "decoder_attention_mask": decoder_attention_mask, ## 修改attention_mask为decoder_input_ids
         "completion_mask": completion_mask,
         "old_log_probs": old_log_probs,   # Static log probs from the current model (old policy)
         "ref_log_probs": ref_log_probs,     # Static log probs from the reference model
@@ -638,15 +679,19 @@ def maximize_grpo_objective(model, ref_model, rollout_data, tokenizer, reward_fu
         float: The loss value.
     """
     # Extract data from rollout
-    input_ids = rollout_data["input_ids"]
-    attention_mask = rollout_data["attention_mask"]
+    prompt_ids = rollout_data["prompt_ids"] ## 新增
+    prompt_mask = rollout_data["prompt_mask"] ## 新增
+    decoder_input_ids = rollout_data["decoder_input_ids"] #修改input_ids为decoder_input_ids
+    decoder_attention_mask = rollout_data["decoder_attention_mask"] #修改input_ids为decoder_input_ids
     completion_mask = rollout_data["completion_mask"]
     old_log_probs = rollout_data["old_log_probs"]
     ref_log_probs = rollout_data["ref_log_probs"]
     logits_to_keep = rollout_data["logits_to_keep"]
     
     # Compute current log probabilities
-    current_log_probs = compute_log_probabilities(model, input_ids, attention_mask, logits_to_keep)
+    # current_log_probs = compute_log_probabilities(model, input_ids, attention_mask, logits_to_keep)
+    ## 修改
+    current_log_probs = compute_log_probabilities(model, prompt_ids, prompt_mask, decoder_input_ids, decoder_attention_mask, logits_to_keep)
     
     # Compute policy ratio
     ratio = torch.exp(current_log_probs - old_log_probs)
@@ -668,7 +713,7 @@ def maximize_grpo_objective(model, ref_model, rollout_data, tokenizer, reward_fu
     # Compute advantages using group-relative normalization
     batch_size = rollout_data["batch_size"]
     num_generations = rollout_data["num_generations"]
-    advantages = compute_group_relative_advantages(rewards, num_generations)
+    advantages = compute_group_relative_advantages(rewards, num_generations) # [Batch_size, 1]
     
     # Compute surrogate loss with clipping
     surrogate1 = ratio * advantages
@@ -718,7 +763,7 @@ def train_with_grpo(model, tokenizer, train_data, num_iterations=1,
     """
     # Initialize policy model
     policy_model = model
-    device = next(policy_model.parameters()).device
+    device = policy_model.device #next(policy_model.parameters()).device
     
     # Outer loop for iterations with reward model updates
     for iteration in range(1, num_iterations + 1):
@@ -738,6 +783,7 @@ def train_with_grpo(model, tokenizer, train_data, num_iterations=1,
         # Inner loop for policy updates
         for step in range(1, steps_per_iteration + 1):
             # Sample batch of prompts
+            ## 这个可以换成dataloader的采样方式
             batch_samples = random.sample(train_data, batch_size)
             
             # Set old policy for this step
@@ -803,7 +849,7 @@ def main():
     print(f"Using device: {device}")
 
     # Define the model name and output directory.
-    model_name = "Qwen/Qwen2.5-0.5B-Instruct" # The 0.5B model is not smart enough
+    model_name = "facebook/bart-base" #"Qwen/Qwen2.5-0.5B-Instruct" # The 0.5B model is not smart enough
                                               # to generate the <reasoning> and <answer> tags
                                               # so several iterations of SFT to teach it these tags
                                               # are recommended before RL
@@ -814,7 +860,14 @@ def main():
     # - attn_implementation selects an optimized attention mechanism.
     # - device_map="auto" automatically distributes the model across available devices.
     print("Downloading model...")
-    model = AutoModelForCausalLM.from_pretrained(
+    # model = AutoModelForCausalLM.from_pretrained(
+    #     model_name,
+    #     torch_dtype=torch.bfloat16,
+    #     #attn_implementation="flash_attention_2",
+    #     device_map=None
+    # )
+    ## 修改为Bart
+    model = BartForConditionalGeneration.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16,
         #attn_implementation="flash_attention_2",
@@ -825,11 +878,15 @@ def main():
     model = model.to(device)
 
     # Load the tokenizer corresponding to the model.
-    tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
+    # tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
+    
+    ## 修改为Bart的tokenizer
+    tokenizer = BartTokenizer.from_pretrained(model_name, padding_side="right")
+    
     # Set the pad token to be the same as the end-of-sequence token.
-    tokenizer.pad_token = tokenizer.eos_token
+    # tokenizer.pad_token = tokenizer.eos_token
     # Update the model configuration with the correct token IDs.
-    model.config.pad_token_id = tokenizer.eos_token_id
+    model.config.pad_token_id = tokenizer.pad_token_id
     model.config.eos_token_id = tokenizer.eos_token_id
 
     # -------------------------------
@@ -860,8 +917,8 @@ def main():
 
     # Define RL training configuration.
     training_config = {
-        'num_iterations' : 1,
-        'steps_per_iteration': 500,                    # Total number of RL training steps.
+        'num_iterations' : 1,                # epoch
+        'steps_per_iteration': 500,          # Total number of RL training steps. （step 4*500个样本被训练）
         'batch_size': 4,                     # Number of samples per training step.
         'num_generations': 8,                # Number of completions generated per prompt.
         'max_completion_length': 500,        # Maximum token length for each generated completion.
