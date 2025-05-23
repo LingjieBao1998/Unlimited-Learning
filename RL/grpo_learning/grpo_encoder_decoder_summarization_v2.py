@@ -422,11 +422,16 @@ def train(
         tokenizer (PreTrainedTokenizer): The tokenizer used for encoding the data.
         training_args (TrainingArguments): The training arguments containing hyperparameters and configurations.
     """
+    ## print the length of dataset
+    print("train_data",len(dataset["train"]))
     # Prepare the dataloader
     train_dataloader = DataLoader(
         dataset["train"],
         collate_fn=DataCollatorForSeq2Seq(tokenizer),
         batch_size=training_args.batch_size,
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2
     )
 
     # Prepare policies
@@ -502,12 +507,12 @@ def train(
             ):
                 old_scores = compute_token_scores(
                     model,
-                    encoder_input_ids=repeated_input_ids,
-                    encoder_attention_mask=repeated_attention_mask,
-                    decoder_input_ids=generated_ids,
-                    decoder_attention_mask=decoder_attention_mask,
-                    batch_size=effective_batch_size,
-                    group_size=training_args.group_size,
+                    encoder_input_ids=repeated_input_ids, #[batch_size*group_size, L1]
+                    encoder_attention_mask=repeated_attention_mask, #[batch_size*group_size, L1]
+                    decoder_input_ids=generated_ids, #[batch_size*group_size, L2]
+                    decoder_attention_mask=decoder_attention_mask, #[batch_size*group_size, L2]
+                    batch_size=effective_batch_size, # batch_size
+                    group_size=training_args.group_size, # group_size
                 ) # [batch_size, training_args.group_size, max_len]
 
             # Compute the sequence scores of the reference model
@@ -524,16 +529,6 @@ def train(
                     group_size=training_args.group_size,
                 )
 
-            # Group the generated ids (batch_size, group_size, output_length)
-            generated_ids = generated_ids.view(
-                effective_batch_size, training_args.group_size, -1
-            )
-
-            # Repeat the labels and group (batch_size, group_size)
-            labels = labels.repeat_interleave(
-                repeats=training_args.group_size, dim=0
-            ).view(effective_batch_size, training_args.group_size, -1)
-
             
             # Compute GRPO objective
             # 核心
@@ -542,6 +537,8 @@ def train(
             for temp_i in range(4):
                 with torch.autocast("cuda", dtype=torch.bfloat16):
                     model.eval()
+                    generated_ids = generated_ids.view(effective_batch_size*training_args.group_size, -1)
+                    
                     current_scores = compute_token_scores(
                         model,
                         encoder_input_ids=repeated_input_ids,
@@ -552,6 +549,16 @@ def train(
                         group_size=training_args.group_size,
                     )
                     model.train()
+                
+                # Group the generated ids (batch_size, group_size, output_length)
+                generated_ids = generated_ids.view(
+                    effective_batch_size, training_args.group_size, -1
+                )
+
+                # Repeat the labels and group (batch_size, group_size)
+                labels = labels.repeat_interleave(
+                    repeats=training_args.group_size, dim=0
+                ).view(effective_batch_size, training_args.group_size, -1)
 
                 with torch.autocast("cuda", dtype=torch.bfloat16):
                     grpo_output = grpo(
@@ -574,6 +581,9 @@ def train(
                 optimizer.step()
                 optimizer.zero_grad()
                 scheduler.step()
+
+                torch.cuda.empty_cache()
+                gc.collect()
 
             # Update log metrics
             batch_metrics = {

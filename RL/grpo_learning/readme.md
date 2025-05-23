@@ -36,6 +36,8 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 | [`grpo_encoder_decoder_summarization.py`](./grpo_encoder_decoder_summarization_v2.py) | [grpo_encoder_decoder_summarization.py](https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71) | 缺点，`old_model`拷贝了一份模型                             |  √√  |   
 | [`grpo_encoder_decoder_summarization_v2.py`](./grpo_encoder_decoder_summarization_v2.py) | [grpo_encoder_decoder_summarization_v2.py](https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71) | 参照https://github.com/Bharath2/Minimal-GRPO, old_scores计算一次，current_scores计算4次，去除了`old_model` |  √√  |   
 
+* grpo_encoder_decoder_summarization.py 287113样本，单卡训练一个epoch需要32h
+* grpo_encoder_decoder_summarization_v2.py 287113样本，单卡训练一个epoch需要145h
 
 ## 报错
 ### nltk导入失败失败

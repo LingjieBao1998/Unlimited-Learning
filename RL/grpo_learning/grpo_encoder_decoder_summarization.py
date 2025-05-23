@@ -422,11 +422,16 @@ def train(
         tokenizer (PreTrainedTokenizer): The tokenizer used for encoding the data.
         training_args (TrainingArguments): The training arguments containing hyperparameters and configurations.
     """
+    ## print the length of dataset
+    print("train_data",len(dataset["train"]))
     # Prepare the dataloader
     train_dataloader = DataLoader(
         dataset["train"],
         collate_fn=DataCollatorForSeq2Seq(tokenizer),
         batch_size=training_args.batch_size,
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2
     )
 
     # Prepare policies
