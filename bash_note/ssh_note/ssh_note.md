@@ -240,7 +240,10 @@ Host local_4090(叫啥都可以)
 ```
 > 有问题
 
-
+autossh
+```
+autossh -M 7281 -NfR 5007:localhost:3003
+```
 
 
 ## scp
