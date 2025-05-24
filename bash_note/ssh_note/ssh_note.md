@@ -130,8 +130,22 @@ PasswordAuthentication yes  # 允许使用密码进行身份验证，建议在�
 
 > ref:https://blog.csdn.net/xie__jin__cheng/article/details/142655337
 
+
+> root 修改密码 
+> 执行如下操作修改root用户密码。
+```bash
+passwd root
+```
+
+
+
+随后重启ssh服务
 ```bash
 systemctl restart ssh
+```
+或者
+```bash
+sudo /etc/init.d/ssh restart
 ```
 
 2. 反向代理建立
@@ -198,6 +212,19 @@ Host local-machine
     ProxyCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -W %h:%p jump-server
 ```
 > ref:https://blog.csdn.net/weixin_42096901/article/details/105193366
+
+如果服务器的公网没有开放2230端口进行访问，则使用一下命令
+```bash
+ssh -J ${jump-server-user}@${jump-server} -p ${jump-server-port} ${USER}@localhost -p ${2230或者其他端口}
+```
+vscode config文件
+```file
+Host local_4090(叫啥都可以)
+  HostName localhost
+  Port ${2230或者其他端口}
+  User lingjiebao
+  ProxyCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -W %h:%p ${jump-server-user}@${jump-server} -p ${jump-server-port}
+```
 
 ### SSH反向代理掉线解决方案
 
