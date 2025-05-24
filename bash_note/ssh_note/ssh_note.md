@@ -213,7 +213,7 @@ Host local-machine
 ```
 > ref:https://blog.csdn.net/weixin_42096901/article/details/105193366
 
-如果服务器的公网没有开放2230端口进行访问，则使用一下命令
+如果服务器的公网没有开放2230端口进行访问，或者不想暴露2230端口，则使用一下命令
 ```bash
 ssh -J ${jump-server-user}@${jump-server} -p ${jump-server-port} ${USER}@localhost -p ${2230或者其他端口}
 ```
