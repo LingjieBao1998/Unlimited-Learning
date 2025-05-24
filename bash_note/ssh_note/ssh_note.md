@@ -211,6 +211,7 @@ Host local-machine
     User 本地用户
     ProxyCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -W %h:%p jump-server
 ```
+> "C:\\Windows\\System32\\OpenSSH\\ssh.exe"需要换成能够运行ssh的文件或者程序
 > ref:https://blog.csdn.net/weixin_42096901/article/details/105193366
 
 如果服务器的公网没有开放2230端口进行访问，或者不想暴露2230端口，则使用一下命令
@@ -225,6 +226,7 @@ Host local_4090(叫啥都可以)
   User lingjiebao
   ProxyCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -W %h:%p ${jump-server-user}@${jump-server} -p ${jump-server-port}
 ```
+> "C:\\Windows\\System32\\OpenSSH\\ssh.exe"需要换成能够运行ssh的文件或者程序
 
 ### SSH反向代理掉线解决方案
 ```bash
