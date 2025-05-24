@@ -6,7 +6,7 @@ npm install markdown-toc -g
 
 ## 生成目录 
 ```bash
-markdown-toc README.md
+doctoc README.md
 ```
 
 ## 参考
