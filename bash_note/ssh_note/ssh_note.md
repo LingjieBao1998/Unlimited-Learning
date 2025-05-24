@@ -227,18 +227,19 @@ Host local_4090(叫啥都可以)
 ```
 
 ### SSH反向代理掉线解决方案
-
 ```bash
 #!/bin/bash
-while true;do
-    RET=`ps ax | grep "ssh -NfR 5007:localhost:3003" | grep -v "grep"`
-    if [ "$RET" = "" ]; then
-        echo "restart ssh server"
-        ssh -NfR 5007:localhost:3003 user@119.1.2.3
-    fi
-    sleep 10
-done
+# while true;do
+#     RET=`ps ax | grep "ssh -NfR 5007:localhost:3003" | grep -v "grep"`
+#     if [ "$RET" = "" ]; then
+#         echo "restart ssh server"
+#         ssh -NfR 5007:localhost:3003 user@119.1.2.3
+#     fi
+#     sleep 10
+# done
 ```
+> 有问题
+
 
 
 
