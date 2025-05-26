@@ -1,3 +1,20 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [GRPO简介](#grpo%E7%AE%80%E4%BB%8B)
+- [复现对比](#%E5%A4%8D%E7%8E%B0%E5%AF%B9%E6%AF%94)
+- [报错](#%E6%8A%A5%E9%94%99)
+  - [nltk导入失败失败](#nltk%E5%AF%BC%E5%85%A5%E5%A4%B1%E8%B4%A5%E5%A4%B1%E8%B4%A5)
+    - [解决方案](#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88)
+- [实现细节&重要参数（待添加）](#%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E9%87%8D%E8%A6%81%E5%8F%82%E6%95%B0%E5%BE%85%E6%B7%BB%E5%8A%A0)
+  - [运行](#%E8%BF%90%E8%A1%8C)
+- [问题](#%E9%97%AE%E9%A2%98)
+- [建议](#%E5%BB%BA%E8%AE%AE)
+- [其他](#%E5%85%B6%E4%BB%96)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## GRPO简介
 GRPO的核心思想是通过组内相对奖励来估计基线（baseline），从而避免使用额外的价值函数模型（critic model）。传统的PPO算法需要训练一个**价值函数**来估计优势函数（advantage function），而GRPO通过从同一问题的多个输出中**计算平均奖励**来替代这一过程，显著减少了内存和计算资源的消耗。
 
@@ -81,6 +98,12 @@ LookupError:
 - '/usr/local/share/nltk_data'
 - '/usr/lib/nltk_data'
 - '/usr/local/lib/nltk_data'
+```
+
+### `evaluate`的metric和`huggingface`的model下载慢
+国内使用huggingface的镜像
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
 ```
 
 ## 实现细节&重要参数（待添加）
