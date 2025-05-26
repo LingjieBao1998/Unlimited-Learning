@@ -7,6 +7,7 @@
 - [报错](#%E6%8A%A5%E9%94%99)
   - [nltk导入失败失败](#nltk%E5%AF%BC%E5%85%A5%E5%A4%B1%E8%B4%A5%E5%A4%B1%E8%B4%A5)
     - [解决方案](#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88)
+  - [`evaluate`的metric和`huggingface`的model下载慢(重要)](#evaluate%E7%9A%84metric%E5%92%8Chuggingface%E7%9A%84model%E4%B8%8B%E8%BD%BD%E6%85%A2%E9%87%8D%E8%A6%81)
 - [实现细节&重要参数（待添加）](#%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E9%87%8D%E8%A6%81%E5%8F%82%E6%95%B0%E5%BE%85%E6%B7%BB%E5%8A%A0)
   - [运行](#%E8%BF%90%E8%A1%8C)
 - [问题](#%E9%97%AE%E9%A2%98)
@@ -100,7 +101,7 @@ LookupError:
 - '/usr/local/lib/nltk_data'
 ```
 
-### `evaluate`的metric和`huggingface`的model下载慢
+### `evaluate`的metric和`huggingface`的model下载慢(重要)
 国内使用huggingface的镜像
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com
