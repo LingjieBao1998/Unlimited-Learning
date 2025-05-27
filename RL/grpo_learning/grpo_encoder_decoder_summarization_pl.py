@@ -462,14 +462,16 @@ class DataModule(pl.LightningDataModule):
             self.training_args.max_document_length,
             self.training_args.max_summary_length,
         )
-        ## 为了测试方便，10000条
         
-        # self.train_dataset=self.dataset["train"]
-        self.train_dataset = self.dataset["train"].select(range(10000))
-        # self.val_dataset=self.dataset["validation"]
-        self.val_dataset=self.dataset["validation"].select(range(100))
-        # self.test_dataset=self.dataset["test"]
-        self.test_dataset=self.dataset["test"].select(range(100))
+        if self.training_args.debug is False:
+            self.train_dataset=self.dataset["train"]
+            self.val_dataset=self.dataset["validation"]
+            self.test_dataset=self.dataset["test"]
+        else:
+            ## 为了测试方便，10000条
+            self.train_dataset = self.dataset["train"].select(range(10000))
+            self.val_dataset=self.dataset["validation"].select(range(100))       
+            self.test_dataset=self.dataset["test"].select(range(100))
     
     @property
     def pad_id(self):
@@ -829,7 +831,7 @@ def main():
         save_dir="./grpo_ainize_bart-base-cnn",
         debug=False,
         eval_per_epoch=5,#每5轮测试一次
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=1,
         max_grad_norm=0.1,
         precision='bf16',#"bf16训练"
         gpus=2,
