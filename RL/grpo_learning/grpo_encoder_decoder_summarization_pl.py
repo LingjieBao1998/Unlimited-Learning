@@ -79,7 +79,7 @@ class TrainingArguments:
     lora_r = 8
     lora_alpha = 32
     lora_dropout = 0.1
-    lora_target_modules=["q_proj", "v_proj", "k_proj"],
+    lora_target_modules=["q_proj", "v_proj", "k_proj"]
 
 
 @dataclass
