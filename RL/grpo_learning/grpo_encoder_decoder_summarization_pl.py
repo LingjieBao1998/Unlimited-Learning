@@ -64,7 +64,7 @@ class TrainingArguments:
     max_grad_norm: float = 0.1  # 最大梯度范数（用于梯度裁剪）
     precision: str = 16  # 精度（如 16 或 "bf16" 或 32）
     gpus: int = 1  # 使用的GPU数量
-    load_path: Optional[str] = None  # 加载预训练模型的路径（可选）
+    load_path: Optional[str] = None  # 加载预训练模型的路径（可选epochs)
     do_train: bool = True  # 是否进行训练
     do_valid: bool = True  # 是否进行验证
     do_test: bool = True  # 是否进行测试
@@ -470,7 +470,7 @@ class DataModule(pl.LightningDataModule):
             self.test_dataset = self.dataset["test"]
         else:
             ## 为了测试方便，10000条
-            self.train_dataset = self.dataset["train"].select(range(10000))
+            self.train_dataset = self.dataset["train"].select(range(100))
             self.val_dataset = self.dataset["validation"].select(range(100))
             self.test_dataset = self.dataset["test"].select(range(100))
 
@@ -740,10 +740,10 @@ class ModelModule(pl.LightningModule):
             gathered_outputs = [None for i in range(self.trainer.num_devices)]
             dist.all_gather_object(gathered_outputs, self.validation_step_outputs)
             # gathered_outputs = sum(gathered_outputs, [])
-            gathered_outputs = np.array(gathered_outputs).reshape(-1,2)
+            gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
         else:
             gathered_outputs = self.validation_step_outputs
-            gathered_outputs = np.array(gathered_outputs).reshape(-1,2)
+            gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
         self.validation_step_outputs.clear()
         if self.current_epoch<=0:
             print("gathered_outputs", gathered_outputs.shape)
@@ -781,10 +781,10 @@ class ModelModule(pl.LightningModule):
             gathered_outputs = [None for i in range(self.trainer.num_devices)]
             dist.all_gather_object(gathered_outputs, self.test_step_outputs)
             # gathered_outputs = sum(gathered_outputs, [])
-            gathered_outputs = np.array(gathered_outputs).reshape(-1,2)
+            gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
         else:
             gathered_outputs = self.test_step_outputs
-            gathered_outputs = np.array(gathered_outputs).reshape(-1,2)
+            gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
         self.test_step_outputs.clear()
 
         if self.current_epoch<=0:
@@ -814,7 +814,7 @@ class ModelModule(pl.LightningModule):
     def on_train_epoch_end(self):
         ## 保存模型
         if (self.current_epoch%5) == 0:
-            self.trainer.save_checkpoint(os.path.join(self.training_args.save_path, f'checkpoints/epoch_{self.current_epoch}.ckpt'))        
+            self.trainer.save_checkpoint(os.path.join(self.training_args.save_dir, f'checkpoints/epoch_{self.current_epoch}.ckpt'))        
 
 class ModelCheckpoint(pl.callbacks.ModelCheckpoint):
     def _get_metric_interpolated_filepath_name(self, monitor_candidates, trainer, del_filepath=None) -> str:
@@ -834,7 +834,7 @@ def main():
     training_args = TrainingArguments(
         model_name = "ainize/bart-base-cnn",
         seed=42,
-        epochs=1,
+        epochs=2,
         num_workers=4,
         batch_size=4,
         learning_rate=1e-5,
@@ -849,14 +849,14 @@ def main():
         gradient_max_norm=0.2,
         save_steps=100,
         scheduler="linear",
-        save_dir="./grpo_ainize_bart-base-cnn",
-        debug=False,
-        eval_per_epoch=5,#每5轮测试一次
+        save_dir="./outputs/grpo_ainize_bart-base-cnn",
+        debug=True,
+        eval_per_epoch=1,#每1轮测试一次
         gradient_accumulation_steps=1,
         max_grad_norm=0.1,
         precision='bf16',#"bf16训练"
         gpus=2,
-        load_path=None,
+        load_path="./outputs/grpo_ainize_bart-base-cnn/checkpoints/best.ckpt",
         do_train=True,
         do_valid=True,
         do_test=True,
@@ -882,6 +882,23 @@ def main():
     dm = DataModule(training_args, tokenizer=tokenizer)
     dm.prepare_data()
     dm.print_stats()
+    
+    try:
+        import tokenizers
+        import transformers
+        ## torch2.6 引入的新机制
+        ## ref:https://stackoverflow.com/questions/79584485/unable-to-torch-load-due-to-pickling-safety-error
+        torch.serialization.add_safe_globals(
+            [
+                transformers.models.bart.tokenization_bart_fast.BartTokenizerFast,
+                TrainingArguments,
+                tokenizers.Tokenizer,
+                tokenizers.models.Model,
+                tokenizers.AddedToken,
+            ]
+        )
+    except:
+        pass
 
     ## 模型
     model = ModelModule(training_args, tokenizer)
@@ -893,19 +910,19 @@ def main():
     lr_monitor = LearningRateMonitor(logging_interval='step')
     os.makedirs(training_args.save_dir, exist_ok=True)
 
-    # logger = pl.loggers.TensorBoardLogger(training_args.save_dir, name='', version='')
+    logger = pl.loggers.TensorBoardLogger(training_args.save_dir, name='', version='')
 
     # # 如果要用wandb,
-    logger = WandbLogger(
-        project="GRPO-Summarization",
-        save_dir=training_args.save_dir,  # 日志保存目录（可选）
-        version="",                    # 可选：版本号（默认为空）
-        config={
-            "model": training_args.model_name,
-            "dataset": "abisee/cnn_dailymail",
-            "training_args": training_args.__dict__,
-        },
-    )
+    # logger = WandbLogger(
+    #     project="GRPO-Summarization",
+    #     save_dir=training_args.save_dir,  # 日志保存目录（可选）
+    #     version="",                    # 可选：版本号（默认为空）
+    #     config={
+    #         "model": training_args.model_name,
+    #         "dataset": "abisee/cnn_dailymail",
+    #         "training_args": training_args.__dict__,
+    #     },
+    # )
 
     trainer = pl.Trainer(
         strategy=DDPStrategy(find_unused_parameters=False),
@@ -926,7 +943,7 @@ def main():
         trainer.num_training_steps = math.ceil(
             len(dm.train_dataset) / (training_args.batch_size * training_args.gpus * training_args.gradient_accumulation_steps)) * training_args.epochs
         model.eval_dataset = dm.val_dataset
-        ckpt_path = os.path.join(training_args.save_path, 'checkpoints/last.ckpt') if training_args.resume else None
+        ckpt_path = os.path.join(training_args.save_dir, 'checkpoints/last.ckpt') if training_args.resume else None
         trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
         ## 导入最优的模型
         model = ModelModule.load_from_checkpoint(checkpoint.best_model_path, training_args=training_args, tokenizer=tokenizer)
