@@ -10,6 +10,7 @@
   - [命令以及参数](#%E5%91%BD%E4%BB%A4%E4%BB%A5%E5%8F%8A%E5%8F%82%E6%95%B0)
   - [case：本地的flask服务在服务器端访问](#case%E6%9C%AC%E5%9C%B0%E7%9A%84flask%E6%9C%8D%E5%8A%A1%E5%9C%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E8%AE%BF%E9%97%AE)
   - [case 反向代理本地的ssh端口到服务器](#case-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%AC%E5%9C%B0%E7%9A%84ssh%E7%AB%AF%E5%8F%A3%E5%88%B0%E6%9C%8D%E5%8A%A1%E5%99%A8)
+  - [反向代理失败的场景](#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%A4%B1%E8%B4%A5%E7%9A%84%E5%9C%BA%E6%99%AF)
   - [SSH反向代理掉线解决方案](#ssh%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%8E%89%E7%BA%BF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88)
 - [scp](#scp)
   - [从本地复制文件到远程主机](#%E4%BB%8E%E6%9C%AC%E5%9C%B0%E5%A4%8D%E5%88%B6%E6%96%87%E4%BB%B6%E5%88%B0%E8%BF%9C%E7%A8%8B%E4%B8%BB%E6%9C%BA)
@@ -248,6 +249,40 @@ Host local_4090(叫啥都可以)
   ProxyCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -W %h:%p ${jump-server-user}@${jump-server} -p ${jump-server-port}
 ```
 > "C:\\Windows\\System32\\OpenSSH\\ssh.exe"需要换成能够运行ssh的文件或者程序
+
+### 反向代理失败的场景
+检查跳板机的 SSH 配置文件`/etc/ssh/sshd_config`：
+```bash
+cat /etc/ssh/sshd_config | grep -E "GatewayPorts|AllowTcpForwarding"
+```
+检查`AllowTcpForwarding`
+>AllowTcpForwarding 是 OpenSSH 服务器（sshd）配置文件（/etc/ssh/sshd_config）中的一个重要参数，用于控制是否允许通过 SSH 建立 ​​TCP 端口转发​​（包括本地转发、远程转发和动态转发）
+
+设置
+```bash
+AllowTcpForwarding yes
+```
+| 值       | 含义                                                                 |
+|----------|----------------------------------------------------------------------|
+| `yes`    | **允许所有 TCP 转发**（默认值）。客户端可以建立本地、远程或动态转发隧道。 |
+| `no`     | **禁止所有 TCP 转发**。即使客户端尝试 `-L`、`-R` 或 `-D` 参数，SSH 服务器也会拒绝。 |
+| `local`  | **仅允许本地转发（`-L`）**，禁止远程转发（`-R`）和动态转发（`-D`）。 |
+| `remote` | **仅允许远程转发（`-R`）**，禁止本地转发（`-L`）和动态转发（`-D`）。 |
+
+
+检查`GatewayPorts`
+> GatewayPorts 是 OpenSSH 服务器（sshd）的一个配置选项，用于控制 ​​反向隧道（Remote Forwarding）​​ 的端口是否可以被外部网络访问。它决定了哪些主机可以连接到通过 -R 参数转发的端口。
+
+```bash
+GatewayPorts yes
+```
+
+| 值 | 含义 |
+|----|------|
+| `no`（默认） | **仅允许本地访问**（`127.0.0.1`），外部网络无法连接。 |
+| `yes` | **允许所有主机访问**（`0.0.0.0`），外部网络可以直接连接。 |
+| `clientspecified` | **由客户端指定**（`-R` 参数可以指定 `bind_address`，如 `0.0.0.0` 或 `127.0.0.1`）。 |
+
 
 ### SSH反向代理掉线解决方案
 ```bash
