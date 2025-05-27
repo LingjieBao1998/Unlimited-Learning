@@ -827,7 +827,7 @@ def main():
         save_steps=100,
         scheduler="linear",
         save_dir="./grpo_ainize_bart-base-cnn",
-        debug=True,
+        debug=False,
         eval_per_epoch=5,#每5轮测试一次
         gradient_accumulation_steps=4,
         max_grad_norm=0.1,
