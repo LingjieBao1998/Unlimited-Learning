@@ -512,8 +512,6 @@ def generate_completions(model, tokenizer, prompts, num_generations=4, max_compl
     prompt_ids = prompt_ids.repeat_interleave(num_generations, dim=0)   # New shape: (batch_size*num_generations, prompt_seq_len)
     prompt_mask = prompt_mask.repeat_interleave(num_generations, dim=0) # New shape: (batch_size*num_generations, prompt_seq_len)
 
-    import ipdb
-    ipdb.set_trace()
     # Generate new tokens for each prompt. The output includes the original prompt and the generated tokens.
     outputs = model.generate(
         prompt_ids,
@@ -744,9 +742,6 @@ def train_with_grpo(model, tokenizer, train_data, num_iterations=1,
         for step in range(1, steps_per_iteration + 1):
             # Sample batch of prompts
             batch_samples = random.sample(train_data, batch_size)
-
-            import ipdb
-            ipdb.set_trace()
             
             # Set old policy for this step
             with torch.no_grad():

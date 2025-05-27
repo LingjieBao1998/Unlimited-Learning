@@ -22,7 +22,7 @@ from transformers import (
 )
 
 import wandb
-
+# ref:https://fabianofalcao.medium.com/metrics-for-evaluating-summarization-of-texts-performed-by-transformers-how-to-evaluate-the-b3ce68a309c3
 rouge_eval = evaluate.load("rouge")
 
 
