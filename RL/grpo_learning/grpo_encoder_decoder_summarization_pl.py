@@ -430,21 +430,22 @@ def compare_models(model1, model2, tol=1e-6):
         list: 不同的参数名称（如果有）
     """
     diff_params = []
-    
+
     # 确保两个模型的参数顺序一致
     for (name1, param1), (name2, param2) in zip(model1.named_parameters(), model2.named_parameters()):
         assert name1 == name2, f"参数名称不匹配: {name1} != {name2}"
-        
+
         # 检查形状是否相同
         if param1.shape != param2.shape:
             diff_params.append(name1)
             continue
-        
+
         # 检查数值是否相同（允许一定的误差）
         if not torch.allclose(param1, param2, atol=tol):
             diff_params.append(name1)
-    
+
     return len(diff_params) == 0, diff_params
+
 
 ## 新增DataModule
 class DataModule(pl.LightningDataModule):
@@ -462,26 +463,26 @@ class DataModule(pl.LightningDataModule):
             self.training_args.max_document_length,
             self.training_args.max_summary_length,
         )
-        
+
         if self.training_args.debug is False:
-            self.train_dataset=self.dataset["train"]
-            self.val_dataset=self.dataset["validation"]
-            self.test_dataset=self.dataset["test"]
+            self.train_dataset = self.dataset["train"]
+            self.val_dataset = self.dataset["validation"]
+            self.test_dataset = self.dataset["test"]
         else:
             ## 为了测试方便，10000条
             self.train_dataset = self.dataset["train"].select(range(10000))
-            self.val_dataset=self.dataset["validation"].select(range(100))       
-            self.test_dataset=self.dataset["test"].select(range(100))
-    
+            self.val_dataset = self.dataset["validation"].select(range(100))
+            self.test_dataset = self.dataset["test"].select(range(100))
+
     @property
     def pad_id(self):
         return self.tokenizer[self.training_args.format].PAD_ID
 
     def print_stats(self):
         ## 打印数据集
-        print(f'Train dataset: {len(self.train_dataset)}')
-        print(f'Valid dataset: {len(self.val_dataset)}')
-        print(f'Test dataset: {len(self.test_dataset)}')
+        print(f"Train dataset: {len(self.train_dataset)}")
+        print(f"Valid dataset: {len(self.val_dataset)}")
+        print(f"Test dataset: {len(self.test_dataset)}")
 
     def setup(self, stage: str = None):  # 必须包含 stage 参数
         pass
@@ -494,43 +495,63 @@ class DataModule(pl.LightningDataModule):
         #     self.test_dataset = ...
 
     def train_dataloader(self):
-        if (self.training_args.debug is False):
+        if self.training_args.debug is False:
             ## 瓶颈不在数据
             # return torch.utils.data.DataLoader(
             #     self.dataset["train"], batch_size=self.training_args.batch_size, num_workers=self.training_args.num_workers,
             #     collate_fn=DataCollatorForSeq2Seq(self.tokenizer), prefetch_factor=2, persistent_workers=True, pin_memory=True,
             #     shuffle=True)
             return torch.utils.data.DataLoader(
-                self.dataset["train"], batch_size=self.training_args.batch_size, num_workers=self.training_args.num_workers,
+                self.train_dataset,
+                batch_size=self.training_args.batch_size,
+                num_workers=self.training_args.num_workers,
                 collate_fn=DataCollatorForSeq2Seq(self.tokenizer),
-                shuffle=True)
+                shuffle=True,
+            )
         else:
             ## 单线程调试
             return torch.utils.data.DataLoader(
-                self.train_dataset, batch_size=self.training_args.batch_size, num_workers=0,
-                collate_fn=DataCollatorForSeq2Seq(self.tokenizer), shuffle=True)
+                self.train_dataset,
+                batch_size=self.training_args.batch_size,
+                num_workers=0,
+                collate_fn=DataCollatorForSeq2Seq(self.tokenizer),
+                shuffle=True,
+            )
 
     def val_dataloader(self):
-        if (self.training_args.debug is False):
+        if self.training_args.debug is False:
             return torch.utils.data.DataLoader(
-                self.val_dataset, batch_size=self.training_args.batch_size*2, num_workers=self.training_args.num_workers,
-                collate_fn=DataCollatorForSeq2Seq(self.tokenizer))
+                self.val_dataset,
+                batch_size=self.training_args.batch_size * 2,
+                num_workers=self.training_args.num_workers,
+                collate_fn=DataCollatorForSeq2Seq(self.tokenizer),
+            )
         else:
             ## 单线程调试
             return torch.utils.data.DataLoader(
-                self.val_dataset, batch_size=self.training_args.batch_size*2, num_workers=0,
-                collate_fn=DataCollatorForSeq2Seq(self.tokenizer))
+                self.val_dataset,
+                batch_size=self.training_args.batch_size * 2,
+                num_workers=0,
+                collate_fn=DataCollatorForSeq2Seq(self.tokenizer),
+            )
 
     def test_dataloader(self):
-        if (self.training_args.debug is False):
+        if self.training_args.debug is False:
             return torch.utils.data.DataLoader(
-                self.test_dataset, batch_size=self.training_args.batch_size*2, num_workers=self.training_args.num_workers,
-                collate_fn=DataCollatorForSeq2Seq(self.tokenizer))
+                self.test_dataset,
+                batch_size=self.training_args.batch_size * 2,
+                num_workers=self.training_args.num_workers,
+                collate_fn=DataCollatorForSeq2Seq(self.tokenizer),
+            )
         else:
             ## 单线程调试
             return torch.utils.data.DataLoader(
-                    self.test_dataset, batch_size=self.training_args.batch_size*2, num_workers=0,
-                    collate_fn=DataCollatorForSeq2Seq(self.tokenizer))
+                self.test_dataset,
+                batch_size=self.training_args.batch_size * 2,
+                num_workers=0,
+                collate_fn=DataCollatorForSeq2Seq(self.tokenizer),
+            )
+
 
 class ModelModule(pl.LightningModule):
 
@@ -794,7 +815,7 @@ class ModelModule(pl.LightningModule):
         ## 保存模型
         if (self.current_epoch%5) == 0:
             self.trainer.save_checkpoint(os.path.join(self.training_args.save_path, f'checkpoints/epoch_{self.current_epoch}.ckpt'))        
-        
+
 class ModelCheckpoint(pl.callbacks.ModelCheckpoint):
     def _get_metric_interpolated_filepath_name(self, monitor_candidates, trainer, del_filepath=None) -> str:
         filepath = self.format_checkpoint_name(monitor_candidates)
