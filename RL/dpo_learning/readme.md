@@ -5,10 +5,10 @@
 
 ## 参考
 
-`gpt-2教程`:https://machinelearningmastery.com/text-generation-with-gpt-2-model/
-`gpt-2教程`:https://colab.research.google.com/drive/13dZVYEOMhXhkXWfvSMVM1TTtUDrT6Aeh#scrollTo=vCPohrZ-CTWu
-`gpt-2指令微调`:https://www.kaggle.com/code/umerhaddii/gpt-instruction-fine-tuning
-`gpt-2dpo微调`：ref:https://github.com/rasbt/LLMs-from-scratch/blob/main/ch07/04_preference-tuning-with-dpo/dpo-from-scratch.ipynb
+- `gpt-2教程`:https://machinelearningmastery.com/text-generation-with-gpt-2-model/
+- `gpt-2教程`:https://colab.research.google.com/drive/13dZVYEOMhXhkXWfvSMVM1TTtUDrT6Aeh#scrollTo=vCPohrZ-CTWu
+- `gpt-2指令微调`:https://www.kaggle.com/code/umerhaddii/gpt-instruction-fine-tuning
+- `gpt-2dpo微调`：ref:https://github.com/rasbt/LLMs-from-scratch/blob/main/ch07/04_preference-tuning-with-dpo/dpo-from-scratch.ipynb
 
 ## TODO
 add some metric to evaluate the performance of model
