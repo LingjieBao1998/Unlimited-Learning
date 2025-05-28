@@ -470,7 +470,7 @@ class DataModule(pl.LightningDataModule):
             self.test_dataset = self.dataset["test"]
         else:
             ## 为了测试方便，10000条
-            self.train_dataset = self.dataset["train"].select(range(100))
+            self.train_dataset = self.dataset["train"].select(range(1000))
             self.val_dataset = self.dataset["validation"].select(range(100))
             self.test_dataset = self.dataset["test"].select(range(100))
 
@@ -740,7 +740,7 @@ class ModelModule(pl.LightningModule):
             gathered_outputs = [None for i in range(self.trainer.num_devices)]
             dist.all_gather_object(gathered_outputs, self.validation_step_outputs)
             # gathered_outputs = sum(gathered_outputs, [])
-            gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
+            gathered_outputs = np.concatenate([np.concatenate(gathered_outputs[i]).reshape(-1,2) for i in range(len(gathered_outputs))]).reshape(-1,2)
         else:
             gathered_outputs = self.validation_step_outputs
             gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
@@ -781,7 +781,7 @@ class ModelModule(pl.LightningModule):
             gathered_outputs = [None for i in range(self.trainer.num_devices)]
             dist.all_gather_object(gathered_outputs, self.test_step_outputs)
             # gathered_outputs = sum(gathered_outputs, [])
-            gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
+            gathered_outputs = np.concatenate([np.concatenate(gathered_outputs[i]).reshape(-1,2) for i in range(len(gathered_outputs))]).reshape(-1,2)
         else:
             gathered_outputs = self.test_step_outputs
             gathered_outputs = np.concatenate(gathered_outputs).reshape(-1,2)
@@ -834,12 +834,12 @@ def main():
     training_args = TrainingArguments(
         model_name = "ainize/bart-base-cnn",
         seed=42,
-        epochs=2,
+        epochs=20,
         num_workers=4,
         batch_size=4,
-        learning_rate=1e-5,
-        update_old_after=1000,
-        group_size=4,
+        learning_rate=1e-4,
+        update_old_after=100,
+        group_size=8,
         logging_steps=10,
         max_new_tokens=128,
         max_document_length=512,
@@ -866,8 +866,8 @@ def main():
     )
 
     ## 单卡单线程调试
-    if training_args.debug is True:
-        training_args.gpus = 1
+    # if training_args.debug is True:
+    #     training_args.gpus = 1
 
 
     pl.seed_everything(training_args.seed, workers=True)
@@ -944,6 +944,8 @@ def main():
             len(dm.train_dataset) / (training_args.batch_size * training_args.gpus * training_args.gradient_accumulation_steps)) * training_args.epochs
         model.eval_dataset = dm.val_dataset
         ckpt_path = os.path.join(training_args.save_dir, 'checkpoints/last.ckpt') if training_args.resume else None
+        ## 先验证一下模型的测试和验证行不行
+        trainer.validate(model, datamodule=dm)
         trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
         ## 导入最优的模型
         model = ModelModule.load_from_checkpoint(checkpoint.best_model_path, training_args=training_args, tokenizer=tokenizer)
