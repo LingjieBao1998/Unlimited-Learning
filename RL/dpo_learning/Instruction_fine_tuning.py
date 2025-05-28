@@ -355,6 +355,8 @@ if __name__ == "__main__":
             len(dm.train_dataset) / (training_args.batch_size * training_args.gpus * training_args.gradient_accumulation_steps)) * training_args.epochs
         model.eval_dataset = dm.val_dataset
         ckpt_path = os.path.join(training_args.save_path, 'checkpoints/last.ckpt') if training_args.resume else None
+        ## 一定要先验证，不然指标不对等于白做
+        trainer.validate(model, datamodule=dm)
         trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
         ## 导入最优的模型
         model = ModelModule.load_from_checkpoint(checkpoint.best_model_path, training_args=training_args, tokenizer=tokenizer)
