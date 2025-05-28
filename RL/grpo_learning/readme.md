@@ -57,7 +57,6 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 * grpo_encoder_decoder_summarization.py 287113样本，单卡训练一个epoch需要32h
 * grpo_encoder_decoder_summarization_v2.py 287113样本，单卡训练一个epoch需要145h
 * grpo_encoder_decoder_summarization_pl.py , grpo_encoder_decoder_summarization.py进阶版，支持多卡训练
-> 后续优化，直接在dataloder中把数据准备好!!!
 
 ## 报错
 ### nltk导入失败失败
