@@ -65,3 +65,6 @@ def compute_dpo_loss(
     # .mean() to average over the samples in the batch
     return losses.mean(), chosen_rewards.mean(), rejected_rewards.mean()
 ```
+
+## 其他
+刚开始复现的时候，学习率设置过小（`learning_rate=1e-5`），导致训练loss很大很难收敛，修改学习率后（`learning_rate=1e-4`），loss变小比较容易收敛；感觉`dpo`有点像监督学习啊啊啊啊啊啊啊

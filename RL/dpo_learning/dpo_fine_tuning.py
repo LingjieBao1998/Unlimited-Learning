@@ -514,7 +514,7 @@ class TrainingArguments:
 
 
 if __name__ == "__main__":
-    training_args = TrainingArguments(epochs=100, debug=True, learning_rate=1e-4)
+    training_args = TrainingArguments(epochs=50, debug=True, learning_rate=1e-4)
 
     if training_args.debug is True:
         training_args.gpus = 1
@@ -538,6 +538,7 @@ if __name__ == "__main__":
                 TrainingArguments,
                 tokenizers.Tokenizer,
                 tokenizers.models.Model,
+                transformers.models.gpt2.modeling_gpt2.GPT2LMHeadModel
             ]
         )
     except:
