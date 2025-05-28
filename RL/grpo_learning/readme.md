@@ -37,7 +37,7 @@ $$std(r)=\sqrt{\frac{1}{G}\sum_{i=1}^{G}(r_{i}-mean(r))^2}$$
 $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 
 4. 计算优势函数
-对于每个输出$o_i$，每个时间步
+对于每个输出 $o_i$ ，每个时间步
 
 
 > ref：https://zhuanlan.zhihu.com/p/20021693569
