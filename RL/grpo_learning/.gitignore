@@ -1,1 +1,8 @@
 train.csv
+wandb
+wandb/*
+outputs/*
+outputs
+output
+output/*
+__pycache__
