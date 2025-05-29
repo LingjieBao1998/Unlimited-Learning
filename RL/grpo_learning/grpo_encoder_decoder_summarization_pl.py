@@ -835,11 +835,11 @@ def main():
         model_name = "ainize/bart-base-cnn",
         seed=42,
         epochs=20,
-        num_workers=4,
+        num_workers=8,
         batch_size=4,
-        learning_rate=1e-4,
+        learning_rate=5e-5,
         update_old_after=100,
-        group_size=8,
+        group_size=16,
         logging_steps=10,
         max_new_tokens=128,
         max_document_length=512,
@@ -857,7 +857,7 @@ def main():
         precision='bf16',#"bf16训练"
         gpus=2,
         load_path="./outputs/grpo_ainize_bart-base-cnn/checkpoints/best.ckpt",
-        do_train=True,
+        do_train=False,
         do_valid=True,
         do_test=True,
         resume=False,
@@ -946,7 +946,7 @@ def main():
         ckpt_path = os.path.join(training_args.save_dir, 'checkpoints/last.ckpt') if training_args.resume else None
         ## 先验证一下模型的测试和验证行不行
         trainer.validate(model, datamodule=dm)
-        trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
+        # trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
         ## 导入最优的模型
         model = ModelModule.load_from_checkpoint(checkpoint.best_model_path, training_args=training_args, tokenizer=tokenizer)
     
