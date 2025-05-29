@@ -2,17 +2,18 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [GRPO简介](#grpo%E7%AE%80%E4%BB%8B)
-- [复现对比](#%E5%A4%8D%E7%8E%B0%E5%AF%B9%E6%AF%94)
-- [报错](#%E6%8A%A5%E9%94%99)
-  - [nltk导入失败失败](#nltk%E5%AF%BC%E5%85%A5%E5%A4%B1%E8%B4%A5%E5%A4%B1%E8%B4%A5)
-    - [解决方案](#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88)
-  - [`evaluate`的metric和`huggingface`的model下载慢(重要)](#evaluate%E7%9A%84metric%E5%92%8Chuggingface%E7%9A%84model%E4%B8%8B%E8%BD%BD%E6%85%A2%E9%87%8D%E8%A6%81)
-- [实现细节&重要参数（待添加）](#%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E9%87%8D%E8%A6%81%E5%8F%82%E6%95%B0%E5%BE%85%E6%B7%BB%E5%8A%A0)
-  - [运行](#%E8%BF%90%E8%A1%8C)
-- [问题](#%E9%97%AE%E9%A2%98)
-- [建议](#%E5%BB%BA%E8%AE%AE)
-- [其他](#%E5%85%B6%E4%BB%96)
+- [GRPO简介](#grpo简介)
+- [复现对比](#复现对比)
+- [报错](#报错)
+  - [nltk导入失败失败](#nltk导入失败失败)
+    - [解决方案](#解决方案)
+  - [`evaluate`的metric和`huggingface`的model下载慢(重要)](#evaluate的metric和huggingface的model下载慢重要)
+- [实现细节\&重要参数（待添加）](#实现细节重要参数待添加)
+  - [运行](#运行)
+- [问题](#问题)
+- [建议](#建议)
+- [其他](#其他)
+- [vllm——grpo](#vllmgrpo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -57,6 +58,19 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 * grpo_encoder_decoder_summarization.py 287113样本，单卡训练一个epoch需要32h
 * grpo_encoder_decoder_summarization_v2.py 287113样本，单卡训练一个epoch需要145h
 * grpo_encoder_decoder_summarization_pl.py , grpo_encoder_decoder_summarization.py进阶版，支持多卡训练
+
+
+1000条训练数据，100条验证数据以及100测试数据的训练20轮复现结果，感觉好像没啥优势啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
+`rouge (top1)`
+| 方法          | val/score | test/score |
+|---------------|-----------|------------|
+| ori           | 0.276     | 0.297      |
+| sft           | 0.278     | 0.300      |
+| grpo+lora     | 0.290     | 0.284      |
+| grpo          | 0.267     | 0.298      |
+唯一能确定的就是`grpo+lora`在验证集上`可能`有效果，感觉朴素的`GPT2`
+TODO: 后续增加数据集继续验证
+
 
 ## 报错
 ### nltk导入失败失败
