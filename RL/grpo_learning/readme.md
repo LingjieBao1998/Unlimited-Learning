@@ -138,7 +138,8 @@ ref:https://zhuanlan.zhihu.com/p/22924256925
 | 指标                | 平均 ROUGE-L F1 分数 (测试集) |
 |---------------------|-----------------------------|
 | **Before (Previous)** | 0.236                       |
-| **After (Post)**      | 0.316                       |
+| **After (Post(1 epoch))**      | 0.316                       |
+| **After (Post(5 epoch))**      | 0.353                       |
 
 **error**
 `TypeError: <lambda>() got an unexpected keyword argument 'completion_ids'`
