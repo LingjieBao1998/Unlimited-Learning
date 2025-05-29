@@ -849,15 +849,15 @@ def main():
         gradient_max_norm=0.2,
         save_steps=100,
         scheduler="linear",
-        save_dir="./outputs/grpo_ainize_bart-base-cnn",
+        save_dir="./outputs/grpo_ainize_bart-base-cnn_no_lora",
         debug=True,
         eval_per_epoch=1,#每1轮测试一次
         gradient_accumulation_steps=1,
         max_grad_norm=0.1,
         precision='bf16',#"bf16训练"
         gpus=2,
-        load_path="./outputs/grpo_ainize_bart-base-cnn/checkpoints/best.ckpt",
-        do_train=False,
+        load_path=None,
+        do_train=True,
         do_valid=True,
         do_test=True,
         resume=False,
@@ -946,7 +946,7 @@ def main():
         ckpt_path = os.path.join(training_args.save_dir, 'checkpoints/last.ckpt') if training_args.resume else None
         ## 先验证一下模型的测试和验证行不行
         trainer.validate(model, datamodule=dm)
-        # trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
+        trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
         ## 导入最优的模型
         model = ModelModule.load_from_checkpoint(checkpoint.best_model_path, training_args=training_args, tokenizer=tokenizer)
     
