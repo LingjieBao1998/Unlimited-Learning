@@ -1,0 +1,6 @@
+output
+output/*
+ppo_learning.ipynb
+training.1600000.processed.noemoticon.csv
+*.txt
+*.lock
