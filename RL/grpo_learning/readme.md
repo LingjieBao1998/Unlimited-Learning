@@ -128,3 +128,91 @@ ref:https://github.com/huggingface/trl/issues/2942
 ## 其他
 * GRPO的简单实现
 ref:https://zhuanlan.zhihu.com/p/22924256925
+
+
+## vllm——grpo
+[`Taylor_Swift_ChatBot_with_GRPO.py`](./Taylor_Swift_ChatBot_with_GRPO.py)
+> ref:https://blog.gopenai.com/llm-fine-tuning-with-grpo-example-6eebe903907b
+
+**result**
+| 指标                | 平均 ROUGE-L F1 分数 (测试集) |
+|---------------------|-----------------------------|
+| **Before (Previous)** | 0.236                       |
+| **After (Post)**      | 0.316                       |
+
+**error**
+`TypeError: <lambda>() got an unexpected keyword argument 'completion_ids'`
+
+修改
+
+```python
+def combined_reward(prompts, completions, answer, model, tokenizer):
+    """Combines ROUGE, Length Similarity, and Qwen-0.5B as LLM-J."""
+
+    rouge_scores = rouge_reward_func(prompts, completions, answer)
+    length_scores = length_similarity_reward_func(prompts, completions, answer)
+
+    generated_responses = [c[0]["content"] for c in completions]
+    llm_scores = llm_judge_reward_batch(
+        prompts, generated_responses, answer, model, tokenizer
+    )
+
+    # Weighted combination of scores
+    final_rewards = [
+        (0.3 * rouge) + (0.2 * length) + (0.5 * llm)
+        for rouge, length, llm in zip(rouge_scores, length_scores, llm_scores)
+    ]
+
+    return final_rewards
+
+trainer = GRPOTrainer(
+    model=model,
+    processing_class=tokenizer,
+    reward_funcs=[
+        # TypeError: <lambda>() got an unexpected keyword argument 'completion_ids'
+        lambda prompts, completions, answer: combined_reward(
+            prompts, completions, answer, model, tokenizer
+        )
+    ],  # Pass model & tokenizer
+    args=training_args,
+    train_dataset=dataset,
+    peft_config=peft_config,
+)
+```
+
+为
+
+```python
+def combined_reward(prompts, completions, answer, model, tokenizer, completion_ids):
+    """Combines ROUGE, Length Similarity, and Qwen-0.5B as LLM-J."""
+
+    rouge_scores = rouge_reward_func(prompts, completions, answer)
+    length_scores = length_similarity_reward_func(prompts, completions, answer)
+
+    generated_responses = [c[0]["content"] for c in completions]
+    llm_scores = llm_judge_reward_batch(
+        prompts, generated_responses, answer, model, tokenizer
+    )
+
+    # Weighted combination of scores
+    final_rewards = [
+        (0.3 * rouge) + (0.2 * length) + (0.5 * llm)
+        for rouge, length, llm in zip(rouge_scores, length_scores, llm_scores)
+    ]
+
+    return final_rewards
+
+trainer = GRPOTrainer(
+    model=model,
+    processing_class=tokenizer,
+    reward_funcs=[
+        # TypeError: <lambda>() got an unexpected keyword argument 'completion_ids'
+        lambda prompts, completions, completion_ids, answer: combined_reward(
+            prompts, completions, answer, model, tokenizer, completion_ids
+        )
+    ],  # Pass model & tokenizer
+    args=training_args,
+    train_dataset=dataset,
+    peft_config=peft_config,
+)
+```

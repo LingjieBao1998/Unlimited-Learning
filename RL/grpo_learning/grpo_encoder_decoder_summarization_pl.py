@@ -711,7 +711,7 @@ class ModelModule(pl.LightningModule):
         )
         torch.cuda.empty_cache()
         gc.collect()
- 
+
         return grpo_output.loss
 
 
