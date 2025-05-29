@@ -68,6 +68,7 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 | sft           | 0.278     | 0.300      |
 | grpo+lora     | 0.290     | 0.284      |
 | grpo          | 0.267     | 0.298      |
+
 唯一能确定的就是`grpo+lora`在验证集上`可能`有效果
 TODO: 后续增加数据集继续验证，或者构造思维链的数据集/使用思维链的模型继续验证
 > ref:https://arxiv.org/html/2309.13182v2
