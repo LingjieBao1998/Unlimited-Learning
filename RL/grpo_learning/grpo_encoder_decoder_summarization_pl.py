@@ -711,7 +711,7 @@ class ModelModule(pl.LightningModule):
         )
         torch.cuda.empty_cache()
         gc.collect()
- 
+
         return grpo_output.loss
 
 
@@ -797,7 +797,7 @@ class ModelModule(pl.LightningModule):
             scores = [score]
         
         dist.broadcast_object_list(scores)
-        self.log('val/score', scores[0], prog_bar=True, rank_zero_only=True)
+        self.log('test/score', scores[0], prog_bar=True, rank_zero_only=True)
 
     def predict_step(self, batch, batch_idx):
         return self.validation_step(batch, batch_idx)
