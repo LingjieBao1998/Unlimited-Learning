@@ -156,6 +156,8 @@ ref:https://zhuanlan.zhihu.com/p/22924256925
 | **After (Post(1 epoch))**      | 0.316                       |
 | **After (Post(5 epoch))**      | 0.353                       |
 
+> 感觉拿有思维链的模型更容易训练
+
 **error**
 `TypeError: <lambda>() got an unexpected keyword argument 'completion_ids'`
 
