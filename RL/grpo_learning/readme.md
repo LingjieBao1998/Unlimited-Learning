@@ -3,7 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [GRPO简介](#grpo简介)
-- [复现对比](#复现对比)
+- [复现对比（decoder-only改encoder-decoder模型或者就是encoder-decoder模型）](#复现对比decoder-only改encoder-decoder模型或者就是encoder-decoder模型)
 - [报错](#报错)
   - [nltk导入失败失败](#nltk导入失败失败)
     - [解决方案](#解决方案)
@@ -14,6 +14,8 @@
 - [建议](#建议)
 - [其他](#其他)
 - [vllm——grpo](#vllmgrpo)
+- [Installation](#installation)
+- [其他实现参考](#其他实现参考)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -44,7 +46,7 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 > ref：https://zhuanlan.zhihu.com/p/20021693569
 
 
-## 复现对比
+## 复现对比（decoder-only改encoder-decoder模型或者就是encoder-decoder模型）
 | 项目                                   | 链接                                                                                                           | 备注                                      | 推介指数 |
 |--------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------------------------------------|----------|
 | `Image_Caption_GRPO`                 | [train_with_grpo.py](https://github.com/liangxu-one/ms-models/blob/image_caption_grpo/research/arxiv_papers/Image_Caption_GRPO/train_with_grpo.py) | 有些包不好安装, 没有实现,|     |
@@ -62,14 +64,25 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 
 1000条训练数据，100条验证数据以及100测试数据的训练20轮复现结果，感觉好像没啥优势啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
 `rouge (top1)`
-| 方法          | val/score | test/score |
+| ~~方法~~          | ~~val/score~~ | ~~test/score~~ |
 |---------------|-----------|------------|
-| ori           | 0.276     | 0.297      |
-| sft           | 0.278     | 0.300      |
-| grpo+lora     | 0.290     | 0.284      |
-| grpo          | 0.267     | 0.298      |
+| ~~ori~~           | ~~0.276~~     | ~~0.297~~      |
+| ~~sft(lora)~~     | ~~0.278~~     | ~~0.300~~      |
+| ~~grpo+lora~~     | ~~0.290~~     | ~~0.284~~      |
+| ~~grpo~~          | ~~0.267~~     | ~~0.298~~      |
 
-唯一能确定的就是`grpo+lora`在验证集上`可能`有效果
+~~唯一能确定的就是`grpo+lora`在验证集上`可能`有效果~~
+
+
+| Method    | Train Score | Val Score | Test Score |
+|-----------|-------------|-----------|------------|
+| ORI       | 0.300       | 0.283     | 0.290      |
+| SFT(LORA)       | 0.323       | 0.283     | 0.300      |
+| GRPO+LORA | 0.304       | 0.287     | 0.298      |
+| GRPO      | 0.306       | 0.286     | 0.300      |
+
+唯一能确定的就是比原始的模型效果好
+
 TODO: 后续增加数据集继续验证，或者构造思维链的数据集/使用思维链的模型继续验证
 > ref:https://arxiv.org/html/2309.13182v2
 
@@ -157,7 +170,7 @@ ref:https://zhuanlan.zhihu.com/p/22924256925
 | **After (Post(1 epoch))**      | 0.316                       |
 | **After (Post(5 epoch))**      | 0.353                       |
 
-> 感觉拿有思维链的模型更容易训练
+> 感觉`本身具有思维链`的模型更容易训练
 
 **error**
 `TypeError: <lambda>() got an unexpected keyword argument 'completion_ids'`
@@ -235,3 +248,15 @@ trainer = GRPOTrainer(
     peft_config=peft_config,
 )
 ```
+
+## Installation
+> 5090
+unsloth installation
+```bash
+pip install "cut-cross-entropy @ git+https://github.com/apple/ml-cross-entropy.git"
+pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+```
+
+
+## 其他实现参考
+`grpo-fine-tuning-on-deepseek-7b`:https://www.analyticsvidhya.com/blog/2025/02/grpo-fine-tuning-on-deepseek-7b/

@@ -1,3 +1,7 @@
+import os
+# 设置 HF 镜像源
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
 import gc
 from copy import deepcopy
 from dataclasses import dataclass
@@ -22,7 +26,6 @@ from transformers import (
     PreTrainedTokenizer,
 )
 
-import os
 import wandb
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor
@@ -743,7 +746,7 @@ def main():
         max_grad_norm=0.1,
         precision='bf16',#"bf16训练"
         gpus=2,
-        load_path=None,#"./outputs/surpurvised_ainize_bart-base-cnn/checkpoints/best.ckpt",
+        load_path="./outputs/surpurvised_ainize_bart-base-cnn/checkpoints/best.ckpt",
         do_train=False,
         do_valid=True,
         do_test=True,

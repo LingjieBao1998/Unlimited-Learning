@@ -1,3 +1,7 @@
+import os
+# 设置 HF 镜像源
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
 import gc
 from copy import deepcopy
 from dataclasses import dataclass
@@ -22,7 +26,6 @@ from transformers import (
     PreTrainedTokenizer,
 )
 
-import os
 import wandb
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor
@@ -36,6 +39,7 @@ import numpy as np
 from pytorch_lightning.loggers import WandbLogger
 from peft import LoraConfig, TaskType, get_peft_model, get_peft_model_state_dict, PeftModel
 rouge_eval = evaluate.load("rouge")
+from collections import OrderedDict
 
 
 @dataclass
@@ -856,13 +860,13 @@ def main():
         max_grad_norm=0.1,
         precision='bf16',#"bf16训练"
         gpus=2,
-        load_path=None,
-        do_train=True,
+        load_path="./outputs/grpo_ainize_bart-base-cnn_no_lora/checkpoints/best.ckpt",
+        do_train=False,
         do_valid=True,
         do_test=True,
         resume=False,
         warmup_ratio=0.02,
-        use_lora=True
+        use_lora=False
     )
 
     ## 单卡单线程调试
@@ -903,7 +907,7 @@ def main():
     ## 模型
     model = ModelModule(training_args, tokenizer)
     if training_args.load_path is not None and os.path.exists(training_args.load_path):
-        model = ModelModule.load_from_checkpoint(training_args.load_path, strict=False, training_args=training_args, tokenizer=tokenizer)
+        model = ModelModule.load_from_checkpoint(training_args.load_path, training_args=training_args, tokenizer=tokenizer)
         print("load form `load_path` successfully")
 
     checkpoint = ModelCheckpoint(monitor='val/score', mode='max', save_top_k=1, filename='best', save_last=True)
@@ -949,6 +953,7 @@ def main():
         trainer.fit(model, datamodule=dm, ckpt_path=ckpt_path)
         ## 导入最优的模型
         model = ModelModule.load_from_checkpoint(checkpoint.best_model_path, training_args=training_args, tokenizer=tokenizer)
+        print("load form `best_path` successfully")
     
     if training_args.do_valid:
         model.eval_dataset = dm.val_dataset
