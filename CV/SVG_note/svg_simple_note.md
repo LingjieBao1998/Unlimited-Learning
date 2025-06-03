@@ -28,7 +28,11 @@
     - [修改——lxml](#修改lxml)
     - [保存为图片/pdf——cairosvg](#保存为图片pdfcairosvg)
     - [写入——svgwrite](#写入svgwrite)
+    - [text2svg](#text2svg)
+  - [其他](#其他)
+    - [rdkit显示svg](#rdkit显示svg)
   - [reference](#reference)
+  - [svg 免费下载的网址](#svg-免费下载的网址)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -241,6 +245,16 @@ points：一系列的用空格，逗号，换行符等分隔开的点。每个�
 <svg>
 
 ```svg
+<svg width="300" height="200">
+<text x="150" y="125" font-size="60" text-anchor="middle">()</text>
+<svg>
+```
+
+<svg width="300" height="200">
+<text x="150" y="125" font-size="60" text-anchor="middle">()</text>
+<svg>
+
+```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
   <text x="100" y="100" font-family="Arial" font-size="20" fill="blue" text-anchor="middle">Hello, SVG!</text>
 </svg>
@@ -315,6 +329,16 @@ points：一系列的用空格，逗号，换行符等分隔开的点。每个�
 
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
   <text x="100" y="15" fill="#666666" rotate="46 10,10" >Hello SVG</text>
+</svg>
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <text x="100" y="15" fill="#666666" >Hello SVG</text>
+</svg>
+```
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <text x="100" y="15" fill="#666666" >Hello SVG</text>
 </svg>
 
 
@@ -421,12 +445,113 @@ dwg.save()
 with open('example.svg', 'r') as file:
   svg_content = file.read()
   print(svg_content)
-
-
 ```
 
 ref:https://github.com/janily/rocksvg/blob/master/docs/01_svg%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/07_%E5%85%83%E7%B4%A0%E7%9A%84%E9%87%8D%E7%94%A8%E4%B8%8E%E5%BC%95%E7%94%A8.md
 
+### text2svg
+有时候一些特殊字符无法被系统默认的字体所显示，这就需要先将其转化成`path`对象，而非`text`对象进行显示
+```python
+#pip install text2svg
+from text2svg import *
+info = TextInfo("Hello World","hello.svg",50,50)
+text2svg(info)
+```
+
+<a href="./hello.svg">hello.svg</a>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50pt" height="50pt" viewBox="0 0 50 50" version="1.1">
+<defs>
+<g>
+<symbol overflow="visible" id="glyph0-0">
+<path style="stroke:none;" d="M 1.25 0 L 1.25 -9.515625 L 6.734375 -9.515625 L 6.734375 0 L 1.25 0 Z M 1.9375 -0.6875 L 6.046875 -0.6875 L 6.046875 -8.84375 L 1.9375 -8.84375 L 1.9375 -0.6875 Z M 1.9375 -0.6875 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-1">
+<path style="stroke:none;" d="M 8.5625 0 L 7.375 0 L 7.375 -4.4375 L 2.5 -4.4375 L 2.5 0 L 1.296875 0 L 1.296875 -9.515625 L 2.5 -9.515625 L 2.5 -5.484375 L 7.375 -5.484375 L 7.375 -9.515625 L 8.5625 -9.515625 L 8.5625 0 Z M 8.5625 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-2">
+<path style="stroke:none;" d="M 3.890625 -7.28125 C 4.503906 -7.28125 5.03125 -7.144531 5.46875 -6.875 C 5.90625 -6.613281 6.242188 -6.238281 6.484375 -5.75 C 6.722656 -5.269531 6.84375 -4.703125 6.84375 -4.046875 L 6.84375 -3.34375 L 1.953125 -3.34375 C 1.960938 -2.53125 2.164062 -1.910156 2.5625 -1.484375 C 2.957031 -1.066406 3.507812 -0.859375 4.21875 -0.859375 C 4.675781 -0.859375 5.078125 -0.898438 5.421875 -0.984375 C 5.773438 -1.078125 6.140625 -1.203125 6.515625 -1.359375 L 6.515625 -0.328125 C 6.148438 -0.171875 5.789062 -0.0546875 5.4375 0.015625 C 5.082031 0.0976562 4.660156 0.140625 4.171875 0.140625 C 3.492188 0.140625 2.894531 0.00390625 2.375 -0.265625 C 1.851562 -0.546875 1.445312 -0.957031 1.15625 -1.5 C 0.875 -2.050781 0.734375 -2.722656 0.734375 -3.515625 C 0.734375 -4.296875 0.863281 -4.96875 1.125 -5.53125 C 1.382812 -6.09375 1.753906 -6.523438 2.234375 -6.828125 C 2.710938 -7.128906 3.265625 -7.28125 3.890625 -7.28125 Z M 3.875 -6.3125 C 3.3125 -6.3125 2.867188 -6.128906 2.546875 -5.765625 C 2.222656 -5.410156 2.03125 -4.914062 1.96875 -4.28125 L 5.609375 -4.28125 C 5.597656 -4.882812 5.453125 -5.375 5.171875 -5.75 C 4.898438 -6.125 4.46875 -6.3125 3.875 -6.3125 Z M 3.875 -6.3125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-3">
+<path style="stroke:none;" d="M 2.3125 0 L 1.140625 0 L 1.140625 -10.125 L 2.3125 -10.125 L 2.3125 0 Z M 2.3125 0 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-4">
+<path style="stroke:none;" d="M 7.34375 -3.578125 C 7.34375 -2.398438 7.039062 -1.484375 6.4375 -0.828125 C 5.84375 -0.179688 5.035156 0.140625 4.015625 0.140625 C 3.378906 0.140625 2.816406 -0.00390625 2.328125 -0.296875 C 1.835938 -0.585938 1.445312 -1.007812 1.15625 -1.5625 C 0.875 -2.125 0.734375 -2.796875 0.734375 -3.578125 C 0.734375 -4.765625 1.03125 -5.675781 1.625 -6.3125 C 2.21875 -6.957031 3.023438 -7.28125 4.046875 -7.28125 C 4.703125 -7.28125 5.273438 -7.132812 5.765625 -6.84375 C 6.253906 -6.550781 6.640625 -6.128906 6.921875 -5.578125 C 7.203125 -5.035156 7.34375 -4.367188 7.34375 -3.578125 Z M 1.953125 -3.578125 C 1.953125 -2.734375 2.117188 -2.066406 2.453125 -1.578125 C 2.785156 -1.085938 3.3125 -0.84375 4.03125 -0.84375 C 4.757812 -0.84375 5.289062 -1.085938 5.625 -1.578125 C 5.957031 -2.066406 6.125 -2.734375 6.125 -3.578125 C 6.125 -4.421875 5.957031 -5.082031 5.625 -5.5625 C 5.289062 -6.050781 4.757812 -6.296875 4.03125 -6.296875 C 3.300781 -6.296875 2.769531 -6.050781 2.4375 -5.5625 C 2.113281 -5.082031 1.953125 -4.421875 1.953125 -3.578125 Z M 1.953125 -3.578125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-5">
+<path style="stroke:none;" d=""/>
+</symbol>
+<symbol overflow="visible" id="glyph0-6">
+<path style="stroke:none;" d="M 12.21875 -9.515625 L 9.6875 0 L 8.484375 0 L 6.625 -6.234375 C 6.550781 -6.492188 6.476562 -6.75 6.40625 -7 C 6.332031 -7.257812 6.273438 -7.488281 6.234375 -7.6875 C 6.191406 -7.894531 6.160156 -8.035156 6.140625 -8.109375 C 6.128906 -7.992188 6.082031 -7.75 6 -7.375 C 5.914062 -7 5.8125 -6.609375 5.6875 -6.203125 L 3.890625 0 L 2.671875 0 L 0.15625 -9.515625 L 1.40625 -9.515625 L 2.890625 -3.703125 C 2.992188 -3.296875 3.082031 -2.898438 3.15625 -2.515625 C 3.238281 -2.140625 3.300781 -1.78125 3.34375 -1.4375 C 3.382812 -1.78125 3.445312 -2.15625 3.53125 -2.5625 C 3.625 -2.976562 3.734375 -3.378906 3.859375 -3.765625 L 5.53125 -9.515625 L 6.765625 -9.515625 L 8.515625 -3.734375 C 8.640625 -3.328125 8.742188 -2.921875 8.828125 -2.515625 C 8.921875 -2.109375 8.988281 -1.75 9.03125 -1.4375 C 9.082031 -1.769531 9.144531 -2.128906 9.21875 -2.515625 C 9.300781 -2.898438 9.394531 -3.300781 9.5 -3.71875 L 10.96875 -9.515625 L 12.21875 -9.515625 Z M 12.21875 -9.515625 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-7">
+<path style="stroke:none;" d="M 4.46875 -7.28125 C 4.601562 -7.28125 4.742188 -7.269531 4.890625 -7.25 C 5.046875 -7.238281 5.179688 -7.222656 5.296875 -7.203125 L 5.15625 -6.125 C 5.039062 -6.144531 4.914062 -6.160156 4.78125 -6.171875 C 4.644531 -6.191406 4.515625 -6.203125 4.390625 -6.203125 C 4.023438 -6.203125 3.679688 -6.101562 3.359375 -5.90625 C 3.035156 -5.707031 2.78125 -5.425781 2.59375 -5.0625 C 2.40625 -4.707031 2.3125 -4.289062 2.3125 -3.8125 L 2.3125 0 L 1.140625 0 L 1.140625 -7.140625 L 2.09375 -7.140625 L 2.21875 -5.84375 L 2.28125 -5.84375 C 2.507812 -6.226562 2.804688 -6.5625 3.171875 -6.84375 C 3.535156 -7.132812 3.96875 -7.28125 4.46875 -7.28125 Z M 4.46875 -7.28125 "/>
+</symbol>
+<symbol overflow="visible" id="glyph0-8">
+<path style="stroke:none;" d="M 3.671875 0.140625 C 2.773438 0.140625 2.0625 -0.164062 1.53125 -0.78125 C 1 -1.40625 0.734375 -2.332031 0.734375 -3.5625 C 0.734375 -4.78125 1 -5.703125 1.53125 -6.328125 C 2.070312 -6.960938 2.785156 -7.28125 3.671875 -7.28125 C 4.222656 -7.28125 4.675781 -7.175781 5.03125 -6.96875 C 5.382812 -6.757812 5.671875 -6.507812 5.890625 -6.21875 L 5.96875 -6.21875 C 5.957031 -6.332031 5.941406 -6.503906 5.921875 -6.734375 C 5.898438 -6.960938 5.890625 -7.144531 5.890625 -7.28125 L 5.890625 -10.125 L 7.0625 -10.125 L 7.0625 0 L 6.125 0 L 5.9375 -0.953125 L 5.890625 -0.953125 C 5.679688 -0.648438 5.394531 -0.390625 5.03125 -0.171875 C 4.675781 0.0351562 4.222656 0.140625 3.671875 0.140625 Z M 3.859375 -0.84375 C 4.609375 -0.84375 5.132812 -1.046875 5.4375 -1.453125 C 5.75 -1.867188 5.90625 -2.492188 5.90625 -3.328125 L 5.90625 -3.546875 C 5.90625 -4.429688 5.757812 -5.109375 5.46875 -5.578125 C 5.175781 -6.054688 4.632812 -6.296875 3.84375 -6.296875 C 3.207031 -6.296875 2.734375 -6.046875 2.421875 -5.546875 C 2.109375 -5.046875 1.953125 -4.375 1.953125 -3.53125 C 1.953125 -2.675781 2.109375 -2.015625 2.421875 -1.546875 C 2.734375 -1.078125 3.210938 -0.84375 3.859375 -0.84375 Z M 3.859375 -0.84375 "/>
+</symbol>
+</g>
+</defs>
+<g id="surface0">
+<g style="fill:rgb(0%,0%,0%);fill-opacity:1;">
+  <use xlink:href="#glyph0-1" x="0" y="15"/>
+  <use xlink:href="#glyph0-2" x="10" y="15"/>
+  <use xlink:href="#glyph0-3" x="18" y="15"/>
+  <use xlink:href="#glyph0-3" x="21" y="15"/>
+  <use xlink:href="#glyph0-4" x="24" y="15"/>
+  <use xlink:href="#glyph0-5" x="32" y="15"/>
+</g>
+<g style="fill:rgb(0%,0%,0%);fill-opacity:1;">
+  <use xlink:href="#glyph0-6" x="0" y="34"/>
+  <use xlink:href="#glyph0-4" x="12" y="34"/>
+  <use xlink:href="#glyph0-7" x="20" y="34"/>
+  <use xlink:href="#glyph0-3" x="26" y="34"/>
+  <use xlink:href="#glyph0-8" x="29" y="34"/>
+</g>
+</g>
+</svg>
+
+> ref:https://pypi.org/project/text2svg/
+
+
+## 其他
+### rdkit显示svg
+```svg
+<svg baseProfile="full" height="200px" version="1.1" width="600px" xml:space="preserve" xmlns:rdkit="http://www.rdkit.org/xml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g transform="translate(0,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#000000" x="84.4958" y="108.25"><tspan>CH</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">4</tspan><tspan/></text>
+</g>
+<g transform="translate(200,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<path d="M 9.09091,100 59.1479,100" style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<path d="M 59.1479,100 109.205,100" style="fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="107.5"><tspan>OH</tspan></text>
+</g>
+<g transform="translate(400,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<path d="M 9.09091,100 55.1606,100" style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<path d="M 55.1606,100 101.23,100" style="fill:none;fill-rule:evenodd;stroke:#0000FF;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="108.25"><tspan>NH</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">2</tspan><tspan/></text>
+</g></svg>
+```
+
+<svg baseProfile="full" height="200px" version="1.1" width="600px" xml:space="preserve" xmlns:rdkit="http://www.rdkit.org/xml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g transform="translate(0,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#000000" x="84.4958" y="108.25"><tspan>CH</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">4</tspan><tspan/></text>
+</g>
+<g transform="translate(200,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<path d="M 9.09091,100 59.1479,100" style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<path d="M 59.1479,100 109.205,100" style="fill:none;fill-rule:evenodd;stroke:#FF0000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="107.5"><tspan>OH</tspan></text>
+</g>
+<g transform="translate(400,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<path d="M 9.09091,100 55.1606,100" style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<path d="M 55.1606,100 101.23,100" style="fill:none;fill-rule:evenodd;stroke:#0000FF;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"/>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="108.25"><tspan>NH</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">2</tspan><tspan/></text>
+</g></svg>
+
+> ref:https://github.com/rdkit/rdkit-tutorials/issues/5
 
 ## reference
 > http://www.aseoe.com/special/webstart/svg/ (强烈推荐) 
+
+## svg 免费下载的网址
+> https://www.svgrepo.com/
