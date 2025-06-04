@@ -50,6 +50,8 @@ $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 
 <img src="./assets/1280X1280.PNG"></img>
 
+> ref：https://zhuanlan.zhihu.com/p/20021693569
+
 ### GRPO的训练流程图
 #### 流程1
 <img src="./assets/flow_chart_1.png"></img>
@@ -62,12 +64,6 @@ ref：[grpo_encoder_decoder_summarization.py](https://gist.github.com/jogonba2/9
 
 > 去除了old policy model
 ref： [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov/theLMbook)
-
-
-
-
-
-> ref：https://zhuanlan.zhihu.com/p/20021693569
 
 
 ## 复现对比（decoder-only改encoder-decoder模型或者就是encoder-decoder模型）
