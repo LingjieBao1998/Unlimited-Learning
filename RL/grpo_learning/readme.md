@@ -3,6 +3,10 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [GRPO简介](#grpo简介)
+  - [GRPO的训练流程](#grpo的训练流程)
+  - [GRPO的训练流程图](#grpo的训练流程图)
+    - [流程1](#流程1)
+    - [流程2](#流程2)
 - [复现对比（decoder-only改encoder-decoder模型或者就是encoder-decoder模型）](#复现对比decoder-only改encoder-decoder模型或者就是encoder-decoder模型)
 - [报错](#报错)
   - [nltk导入失败失败](#nltk导入失败失败)
@@ -24,7 +28,7 @@ GRPO的核心思想是通过组内相对奖励来估计基线（baseline），�
 
 所以将GRPO迁移到其他领域，只需要对奖励函数进行修改和定义，可以是基于规则的奖励函数页可以是奖励模型所给出的奖励函数。（有一种大道至简的感觉）
 
-GRPO的训练流程
+### GRPO的训练流程
 1. 初始化
 * 策略模型 $\pi_{\theta}$ ，通常是基于预训练之后的模型
 * 奖励模型 $r_{\phi}$ ，对模型的输出进行评分
@@ -40,7 +44,27 @@ $$std(r)=\sqrt{\frac{1}{G}\sum_{i=1}^{G}(r_{i}-mean(r))^2}$$
 $$\hat{r_i} = \frac{r_i-mean(r)}{std(r)}$$
 
 4. 计算优势函数
-对于每个输出 $o_i$ ，每个时间步
+对于每个输出 $o_i$ ，每个时间步 $t$ 的优势函数 $A_{i,t}=\hat{r_i}$
+
+5. 最大化目标函数
+
+<img src="./assets/1280X1280.PNG"></img>
+
+### GRPO的训练流程图
+#### 流程1
+<img src="./assets/flow_chart_1.png"></img>
+
+
+ref：[grpo_encoder_decoder_summarization.py](https://gist.github.com/jogonba2/9bee8bb154a292b24850f1483daa6b71)
+
+#### 流程2
+<img src="./assets/flow_chart_2.png"></img>
+
+> 去除了old policy model
+ref： [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov/theLMbook)
+
+
+
 
 
 > ref：https://zhuanlan.zhihu.com/p/20021693569
