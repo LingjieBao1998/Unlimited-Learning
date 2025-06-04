@@ -686,8 +686,6 @@ def maximize_grpo_objective(model, ref_model, rollout_data, tokenizer, reward_fu
     # Optimization step
     optimizer.zero_grad()
     loss.backward()
-    import ipdb
-    ipdb.set_trace()
     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=0.1)
     optimizer.step()
     

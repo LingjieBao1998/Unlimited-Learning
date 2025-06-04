@@ -866,7 +866,7 @@ def main():
         do_test=True,
         resume=False,
         warmup_ratio=0.02,
-        use_lora=False
+        use_lora=True
     )
 
     ## 单卡单线程调试
@@ -907,7 +907,7 @@ def main():
     ## 模型
     model = ModelModule(training_args, tokenizer)
     if training_args.load_path is not None and os.path.exists(training_args.load_path):
-        model = ModelModule.load_from_checkpoint(training_args.load_path, training_args=training_args, tokenizer=tokenizer)
+        model = ModelModule.load_from_checkpoint(training_args.load_path, training_args=training_args, tokenizer=tokenizer, strict=False)
         print("load form `load_path` successfully")
 
     checkpoint = ModelCheckpoint(monitor='val/score', mode='max', save_top_k=1, filename='best', save_last=True)
