@@ -63,6 +63,7 @@ ref：[grpo_encoder_decoder_summarization.py](https://gist.github.com/jogonba2/9
 <img src="./assets/flow_chart_2.png"></img>
 
 > 去除了old policy model
+
 ref： [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov/theLMbook)
 
 
