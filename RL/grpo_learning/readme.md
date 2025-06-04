@@ -97,7 +97,7 @@ ref： [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov
 | Method    | Train Score | Val Score | Test Score |
 |-----------|-------------|-----------|------------|
 | ORI       | 0.300       | 0.283     | 0.290      |
-| SFT(LORA)       | 0.323       | 0.283     | 0.300      |
+| SFT(LORA) | 0.323       | 0.283     | 0.300      |
 | GRPO+LORA | 0.304       | 0.287     | 0.298      |
 | GRPO      | 0.306       | 0.286     | 0.300      |
 
