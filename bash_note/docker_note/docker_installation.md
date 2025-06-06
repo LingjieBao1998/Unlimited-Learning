@@ -1,3 +1,20 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+  - [docker 安装](#docker-%E5%AE%89%E8%A3%85)
+    - [卸载旧版本](#%E5%8D%B8%E8%BD%BD%E6%97%A7%E7%89%88%E6%9C%AC)
+    - [使用 APT 安装](#%E4%BD%BF%E7%94%A8-apt-%E5%AE%89%E8%A3%85)
+    - [安装 Docker](#%E5%AE%89%E8%A3%85-docker)
+    - [启动 Docker](#%E5%90%AF%E5%8A%A8-docker)
+    - [nvidia-docker 安装](#nvidia-docker-%E5%AE%89%E8%A3%85)
+- [安装依赖](#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96)
+- [添加密钥和仓库](#%E6%B7%BB%E5%8A%A0%E5%AF%86%E9%92%A5%E5%92%8C%E4%BB%93%E5%BA%93)
+    - [镜像加速](#%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F)
+      - [配置`/etc/docker/daemon.json`](#%E9%85%8D%E7%BD%AEetcdockerdaemonjson)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## docker 安装
 ref:https://yeasy.gitbook.io/docker_practice/install/ubuntu
 
@@ -59,15 +76,15 @@ wget https://developer.download.nvidia.com/compute/cuda/12.0.1/local_installers/
 sudo sh cuda_12.0.1_525.85.12_linux.run
 ```
 
-
-
-```
 添加官方仓库
 # 安装依赖
+```bash
 sudo apt-get update
 sudo apt-get install -y curl
+```
 
 # 添加密钥和仓库
+```bash
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
 curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
@@ -116,7 +133,3 @@ docker info
 https://www.coderjia.cn/archives/dba3f94c-a021-468a-8ac6-e840f85867ea
 
 ref: https://blog.csdn.net/Lichen0196/article/details/137355517
-
-
-
-
