@@ -66,6 +66,9 @@ ref：[grpo_encoder_decoder_summarization.py](https://gist.github.com/jogonba2/9
 
 ref： [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov/theLMbook)
 
+`reference model`可以在模型训练一定步数后，更新为最新的`policy model`
+> ref: https://github.com/Jaykef/ai-algorithms/blob/main/grpo_multimodal_reasoner.ipynb
+
 
 ## 复现对比（decoder-only改encoder-decoder模型或者就是encoder-decoder模型）
 | 项目                                   | 链接                                                                                                           | 备注                                      | 推介指数 |
@@ -160,7 +163,7 @@ export HF_ENDPOINT=https://hf-mirror.com
 ## 实现细节&重要参数（待添加）
 ### 运行
 ```bash
-python grpo_encoder_decoder_summarization.py
+python grpo_encoder_decoder_summarization_pl.py
 ```
 
 
@@ -281,3 +284,5 @@ pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 
 ## 其他实现参考
 `grpo-fine-tuning-on-deepseek-7b`:https://www.analyticsvidhya.com/blog/2025/02/grpo-fine-tuning-on-deepseek-7b/
+
+`grpo+SmolVLM`:https://github.com/Jaykef/ai-algorithms/blob/main/grpo_multimodal_reasoner.ipynb
