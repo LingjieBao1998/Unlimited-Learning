@@ -282,9 +282,9 @@ python grpo_encoder_decoder_summarization_pl.py
 
 #### 其他和GRPO相关的参数
 - `update_old_after`: int = 1000  # 更新旧策略的步数
-- `group_size` ( $ G $ )$$: int = 5  # 组大小（GRPO相关）,deepseek原文用了**64**，group_size越大，显存消耗越多
+- `group_size` ( $G$ ) : int = 5  # 组大小（GRPO相关）,deepseek原文用了**64**，group_size越大，显存消耗越多
 - `grpo_epsilon` ( $\epsilon$ ) : float = 0.1  # GRPO的epsilon参数，控制模型的更新不要太大，增加训练的稳定性
-- `grpo_beta` ( $ \beta $ ) : float = 0.04  # GRPO的beta参数，限制模型与`reference model`的输出相接近
+- `grpo_beta` ( $\beta$ ) : float = 0.04  # GRPO的beta参数，限制模型与`reference model`的输出相接近
 > 第一个是工程化实现相关的参数; 剩下几个和 **GRPO** 公式相关
 
 ## 问题
