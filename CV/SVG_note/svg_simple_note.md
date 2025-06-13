@@ -272,6 +272,14 @@ points：一系列的用空格，逗号，换行符等分隔开的点。每个�
   <text x="0" y="15" fill="red" transform="rotate(30 20,40)">I love SVG</text>
 </svg>
 
+> transform="rotate(30 20,40)"
+这个 transform 属性是 SVG 中用来对元素进行几何变换（如旋转、平移、缩放等）的属性。具体到 rotate(30 20,40)，它表示对 <text> 元素应用一个​​旋转变换​​。这个 rotate() 函数的语法是：
+```svg
+rotate(<angle> [<cx> <cy>])
+```
+* <angle>：旋转的角度，单位是​​度（degrees）​​，正值表示​​逆时针​​旋转，负值表示​​顺时针​​旋转。
+* <cx> <cy>（可选）：旋转中心的坐标（x, y），如果不指定，默认以元素的​​原点（通常是左上角）​​为旋转中心。
+
 
 
 ## 样式
@@ -549,6 +557,41 @@ text2svg(info)
 </g></svg>
 
 > ref:https://github.com/rdkit/rdkit-tutorials/issues/5
+
+其他rdkit的样式
+上标 & 下标 & 特殊字符
+
+<svg baseProfile="full" height="200px" version="1.1" width="600px" xml:space="preserve" xmlns:rdkit="http://www.rdkit.org/xml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g transform="translate(0,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#000000" x="84.4958" y="108.25"><tspan>CH</tspan><tspan style="baseline-shift:super;font-size:11.25px;">4</tspan><tspan/></text>
+</g>
+<g transform="translate(200,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.23" y="93.25"><tspan>⊖</tspan></text> 
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="107.5"><tspan>OH</tspan><tspan style="baseline-shift:super;font-size:11.25px;">​⊖</tspan></text>
+</g>
+<g transform="translate(400,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="93.25"><tspan>​​⨁</tspan></text> <!-- 加个字体高度就了 -->
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="108.25"><tspan>N</tspan><tspan/><tspan style="baseline-shift:super;font-size:11.25px;">​​⨁</tspan></text>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="123.25"><tspan>H</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">2</tspan><tspan/></text> <!-- 加个字体高度就了 -->
+</g></svg>
+
+
+
+<svg baseProfile="full" height="200px" version="1.1" width="600px" xml:space="preserve" xmlns:rdkit="http://www.rdkit.org/xml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g transform="translate(0,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#000000" x="84.4958" y="108.25"><tspan>CH</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">4</tspan><tspan/></text>
+</g>
+<g transform="translate(200,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="107.5"><tspan>O</tspan></text>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="123.5"><tspan>TS</tspan></text>
+</g>
+<g transform="translate(400,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="93.25"><tspan>​​Boc</tspan></text> <!-- 加个字体高度就了 -->
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="108.25"><tspan>N</tspan><tspan/></text>
+</g></svg>
+
+                            
+
 
 ## reference
 > http://www.aseoe.com/special/webstart/svg/ (强烈推荐) 
