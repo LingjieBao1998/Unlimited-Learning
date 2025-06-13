@@ -587,11 +587,12 @@ text2svg(info)
 <text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="123.5"><tspan>TS</tspan></text>
 </g>
 <g transform="translate(400,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
-<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="93.25"><tspan>​​Boc</tspan></text> <!-- 加个字体高度就了 -->
+<text style="font-size:15px;font-style:italic;font-weight:bold;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="93.25"><tspan>​​Boc</tspan></text> <!-- 加个字体高度就了 -->
 <text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="108.25"><tspan>N</tspan><tspan/></text>
 </g></svg>
 
-                            
+> * `font-weight`: 控制字体粗细, `normal`（默认）、`bold`（加粗）、`bolder`、`lighter`、`100~900`（数值越大力度越大）	
+> * `font-style`: 控制字体是否倾斜, `normal`（默认）、`italic`（斜体）、`oblique`（倾斜，类似斜体但更依赖字体支持）	
 
 
 ## reference
