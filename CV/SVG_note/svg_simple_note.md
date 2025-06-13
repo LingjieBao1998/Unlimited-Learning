@@ -416,10 +416,8 @@ for element in svg_root.iter():
 ```python
 paths = svg_root.findall('.//{http://www.w3.org/2000/svg}path')
 
-
 for path in paths:
   print(path.attrib['d'])  # 输出路径的d属性
-
 
 # 修改某个路径的d属性
 if paths:
@@ -444,14 +442,11 @@ import svgwrite
 # 创建一个新的SVG文件
 dwg = svgwrite.Drawing('output.svg', profile='tiny')
 
-
 # 添加一个圆形元素
 dwg.add(dwg.circle(center=(50, 50), r=40, fill='red'))
 
-
 # 保存SVG文件
 dwg.save()
-
 
 # 读取并操作现有的SVG文件
 with open('example.svg', 'r') as file:
