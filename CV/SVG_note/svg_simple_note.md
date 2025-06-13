@@ -123,7 +123,7 @@ The HTML `<svg>` element is a container for SVG graphics.
 * `height`：矩形高度。
 * `rx`：实现圆角效果时，圆角沿x轴的半径。
 * `ry`：实现圆角效果时，圆角沿y轴的半径。
-* 
+
 ```svg
 <svg width="400" height="120">
   <rect x="10" y="10" width="200" height="100" stroke="red" stroke-width="6" fill="blue" />
@@ -136,12 +136,6 @@ The HTML `<svg>` element is a container for SVG graphics.
 ref:https://www.w3schools.com/HTML/html5_svg.asp
 
 可以用于添加背景（因为背景通常为**矩形**）
-添加背景——`rect`
-
-<svg width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-<rect width="100%" height="100%" fill="white" />
-<circle xmlns="http://www.w3.org/2000/svg" cx="80" cy="80" r="78" stroke-dasharray="5 5" stroke="black" fill="none" stroke-width="2"/>
-</svg>
 
 ### ellipse
 * `rx`：半长轴(x半径)。
@@ -159,6 +153,13 @@ ref:https://www.w3schools.com/HTML/html5_svg.asp
   <ellipse cx="300" cy="80" rx="100" ry="50"
   style="fill:yellow;stroke:purple;stroke-width:2"/>
 </svg>
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"  width="500" height="150">
+  <ellipse cx="240" cy="50" rx="220" ry="30" style="fill:yellow"/>
+  <ellipse cx="220" cy="50" rx="190" ry="20" style="fill:white"/>
+</svg>
+```
 
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1"  width="500" height="150">
   <ellipse cx="240" cy="50" rx="220" ry="30" style="fill:yellow"/>
@@ -234,6 +235,8 @@ points：一系列的用空格，逗号，换行符等分隔开的点。每个�
 * `font-size` 属性定义了文本的字体大小，以像素为单位。
 * `fill` 属性定义了文本的颜色。
 * `text-anchor` 属性定义了文本锚点，即文本相对于指定坐标的对齐方式，常用取值有 `"start"`（默认，左对齐）、`"middle"`（居中对齐）和 `"end"`（右对齐）。
+
+> `<text>`:通常无法给出准确的`bbox`位置
 ```svg
 <svg width="300" height="200">
 <text x="150" y="125" font-size="60" text-anchor="middle">SVG</text>
@@ -277,8 +280,8 @@ points：一系列的用空格，逗号，换行符等分隔开的点。每个�
 ```svg
 rotate(<angle> [<cx> <cy>])
 ```
-* <angle>：旋转的角度，单位是​​度（degrees）​​，正值表示​​逆时针​​旋转，负值表示​​顺时针​​旋转。
-* <cx> <cy>（可选）：旋转中心的坐标（x, y），如果不指定，默认以元素的​​原点（通常是左上角）​​为旋转中心。
+* `<angle>`：旋转的角度，单位是​​度（degrees）​​，正值表示​​逆时针​​旋转，负值表示​​顺时针​​旋转。
+* `<cx>` `<cy>`（可选）：旋转中心的坐标（x, y），如果不指定，默认以元素的​​原点（通常是左上角）​​为旋转中心。
 
 
 
@@ -328,6 +331,16 @@ rotate(<angle> [<cx> <cy>])
 </svg>
 
 ### rotate
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <text x="100" y="15" fill="#666666" >Hello SVG</text>
+</svg>
+```
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <text x="100" y="15" fill="#666666" >Hello SVG</text>
+</svg>
+
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
@@ -339,15 +352,6 @@ rotate(<angle> [<cx> <cy>])
   <text x="100" y="15" fill="#666666" rotate="46 10,10" >Hello SVG</text>
 </svg>
 
-```svg
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-  <text x="100" y="15" fill="#666666" >Hello SVG</text>
-</svg>
-```
-
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-  <text x="100" y="15" fill="#666666" >Hello SVG</text>
-</svg>
 
 
 
@@ -384,7 +388,7 @@ g元素是一种容器，它组合一组相关的图形元素成为一个整体
                 C74.6,79.34,72.39,77.13,72.39,74.39"/>
         </g>
     </g>
-
+</svg>
 
 ## svg与python
 ### 解析——lxml
@@ -566,11 +570,13 @@ text2svg(info)
 <text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#000000" x="84.4958" y="108.25"><tspan>CH</tspan><tspan style="baseline-shift:super;font-size:11.25px;">4</tspan><tspan/></text>
 </g>
 <g transform="translate(200,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
-<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.23" y="93.25"><tspan>⊖</tspan></text> 
-<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="107.5"><tspan>OH</tspan><tspan style="baseline-shift:super;font-size:11.25px;">​⊖</tspan></text>
+<text style="font-size:13.5px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.23" y="93.25"><tspan>⊖</tspan></text> 
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="107.5"><tspan>O</tspan><tspan style="baseline-shift:super;font-size:11.25px;">​⊖</tspan></text>
+<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#FF0000" x="109.205" y="123.5"><tspan>H</tspan></text>
+
 </g>
 <g transform="translate(400,0)"><rect height="200" style="opacity:1.0;fill:#FFFFFF;stroke:none" width="200" x="0" y="0"> </rect>
-<text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="93.25"><tspan>​​⨁</tspan></text> <!-- 加个字体高度就了 -->
+<text style="font-size:13.5px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="93.25"><tspan>​​⨁</tspan></text> <!-- 加个字体高度就了 -->
 <text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="108.25"><tspan>N</tspan><tspan/><tspan style="baseline-shift:super;font-size:11.25px;">​​⨁</tspan></text>
 <text style="font-size:15px;font-style:normal;font-weight:normal;fill-opacity:1;stroke:none;font-family:sans-serif;text-anchor:start;fill:#0000FF" x="101.23" y="123.25"><tspan>H</tspan><tspan style="baseline-shift:sub;font-size:11.25px;">2</tspan><tspan/></text> <!-- 加个字体高度就了 -->
 </g></svg>
