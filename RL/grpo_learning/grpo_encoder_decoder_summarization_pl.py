@@ -602,10 +602,18 @@ class ModelModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         ## 更新模型
         # Update old policy periodically
-        if ((self.global_step ) * self.trainer.num_devices  <= self.training_args.update_old_after) and \
-            ((self.global_step + 1 ) * self.trainer.num_devices  > self.training_args.update_old_after):
-            self.old_model.load_state_dict(self.model.state_dict(), strict=False)
-            torch.cuda.empty_cache()
+        temp_i = 0
+        while True:
+            if ((self.global_step ) * self.trainer.num_devices  <= self.training_args.update_old_after * temp_i) and \
+                ((self.global_step + 1 ) * self.trainer.num_devices  > self.training_args.update_old_after * temp_i):
+                self.old_model.load_state_dict(self.model.state_dict(), strict=False)
+                torch.cuda.empty_cache()
+                break
+            elif self.training_args.update_old_after * temp_i >= (self.global_step + 1 ) * self.trainer.num_devices:
+                break
+            else:
+                temp_i = temp_i + 1
+
 
 
         # Prepare the batch data
