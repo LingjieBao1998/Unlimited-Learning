@@ -8,7 +8,7 @@
 
 ## PDBE
 ```md
-`pdbe-github`:https://github.com/PDBeurope/pdbe-api-training
+'pdbe-github':https://github.com/PDBeurope/pdbe-api-training
 ```
 
 ## markush数据集
