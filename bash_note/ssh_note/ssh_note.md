@@ -302,6 +302,11 @@ autossh
 ```
 autossh -M 7281 -NfR 5007:localhost:3003
 ```
+for example
+```bash
+autossh -M 7281 -NfR 2231:localhost:22 root@localhost
+```
+> 将当前与用户地`22`端口映射到localhost地root用户地`2231`端口
 
 
 ## scp
