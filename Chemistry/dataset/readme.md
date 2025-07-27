@@ -49,3 +49,9 @@ https://bioinformaticsdotca.github.io/metabolomics_2020
 ```md
 https://drugbud-suite.github.io/CADD_Vault/Protein%20Structure/Binding%20Site%20Prediction/
 ```
+
+## 分子搜索算法
+```md
+usearch-molecules:https://github.com/ashvardanian/usearch-molecules;
+usearch-molecules:https://ashvardanian.com/posts/usearch-molecules/#exploring-different-molecule-fingerprints
+```
