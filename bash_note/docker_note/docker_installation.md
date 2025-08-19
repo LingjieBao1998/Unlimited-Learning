@@ -149,3 +149,11 @@ docker system prune -a --volumes
 所有 未被使用的网络
 所有 未被挂载的卷（volumes）
 请确保你不需要这些数据！比如数据库卷、日志卷等，删除后可能无法恢复！
+
+previous
+<img src="assets/previous.jpg"></img>
+
+post
+<img src="assets/post.jpg"></img>
+
+> 清理效果明显
