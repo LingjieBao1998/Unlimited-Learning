@@ -133,3 +133,19 @@ docker info
 https://www.coderjia.cn/archives/dba3f94c-a021-468a-8ac6-e840f85867ea
 
 ref: https://blog.csdn.net/Lichen0196/article/details/137355517
+
+## 自动清理 Docker 占用的磁盘空间
+```bash
+docker system prune -a --volumes
+```
+⚠️ 命令解释：
+* docker system prune：清理未使用的 镜像、容器、网络、构建缓存
+* -a：包括未使用的镜像（而不仅是悬空镜像）
+* --volumes：包括未使用的 Docker 卷（volumes），这通常占用了大量空间！
+
+⚠️ 注意：此命令会删除：
+所有 未被任何容器使用的镜像
+所有 停止的容器
+所有 未被使用的网络
+所有 未被挂载的卷（volumes）
+请确保你不需要这些数据！比如数据库卷、日志卷等，删除后可能无法恢复！
