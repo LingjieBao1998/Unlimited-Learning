@@ -55,3 +55,8 @@ https://drugbud-suite.github.io/CADD_Vault/Protein%20Structure/Binding%20Site%20
 usearch-molecules:https://github.com/ashvardanian/usearch-molecules;
 usearch-molecules:https://ashvardanian.com/posts/usearch-molecules/#exploring-different-molecule-fingerprints
 ```
+
+## 官能团查询
+```md
+https://github.com/ipqa-research/ugropy
+```
