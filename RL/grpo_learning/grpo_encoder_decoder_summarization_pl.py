@@ -56,7 +56,8 @@ class TrainingArguments:
     max_new_tokens: int = 128  # 生成的最大token数
     max_document_length: int = 512  # 文档最大长度
     max_summary_length: int = 128  # 摘要最大长度
-    grpo_epsilon: float = 0.1  # GRPO的epsilon参数
+    grpo_lower_epsilon: float = 0.1  # GRPO的epsilon参数
+    grpo_higher_epsilon: float = 0.1, # GRPO的epsilon参数
     grpo_beta: float = 0.04  # GRPO的beta参数
     gradient_max_norm: float = 0.2  # 梯度裁剪的最大范数
     save_steps: int = 100  # 保存模型的步数
@@ -75,6 +76,8 @@ class TrainingArguments:
     resume: bool = False # 是否继续进行训练
     warmup_ratio: float = 0.00 # warmup的比例
     weight_decay: float = 0.0001 #L2 正则化
+
+    loss_type: str = "grpo"
 
     # refer：https://github.com/YanSte/NLP-LLM-Fine-tuning-QA-LoRA-T5/blob/main/nlp-llm-fine-tuning-lora-t5-l.ipynb
     use_lora : bool = False
@@ -106,10 +109,19 @@ def load_model(model_name: str) -> PreTrainedModel:
     Returns:
         PreTrainedModel: The loaded pre-trained model
     """
+    try:
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16,      # 推荐使用 bfloat16 或 float16
+            use_flash_attention_2=True,      # ✅ 关键：启用 Flash Attention 2
+        ).to("cuda")
+    except Exception as e:
+        print(e)
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16,      # 推荐使用 bfloat16 或 float16
+        )
 
-    model = AutoModelForSeq2SeqLM.from_pretrained(
-        model_name, torch_dtype=torch.bfloat16
-    )
     model = model.to("cuda")
     return model
 
@@ -343,8 +355,10 @@ def grpo(
     reference_scores: FloatTensor,
     labels: LongTensor,
     tokenizer: PreTrainedTokenizer,
-    epsilon: float,
+    lower_epsilon: float,
+    higher_epsilon: float,
     beta: float,
+    loss_type: str = "grpo"
 ) -> GRPOOutput:
     """
     Compute the loss of Group Relative Policy Optimization (GRPO) on the given inputs.
@@ -363,6 +377,9 @@ def grpo(
     losses = torch.zeros(generated_ids.shape[0])
     rewards = torch.zeros(generated_ids.shape[0])
     kls = torch.zeros(generated_ids.shape[0])
+
+    if reference_scores is None:
+        reference_scores = [None] * len(generated_ids)
 
     for idx, (
         group_ids,
@@ -386,33 +403,69 @@ def grpo(
         # Store the mean of each rewards for the group
         rewards[idx] = group_rewards.rewards.mean()
 
-        # Compute the ratios
-        ratios = torch.exp(group_current_scores - group_old_scores)
+        # Compute the ratios(log_importance_weights)
+        if loss_type == "grpo":
+            log_ratio = group_current_scores - group_old_scores
+            log_ratio = torch.clamp(log_ratio, max=10.0)
+            ratios = torch.exp(log_ratio)
+        elif loss_type == "gspo":
+            log_ratio = group_current_scores - group_old_scores
+            log_ratio = torch.clamp(log_ratio, max=10.0)
+            completion_mask = group_ids[:, 1:] != tokenizer.pad_token_id
+            seq_weight = (log_ratio * completion_mask).sum(-1) / completion_mask.sum(-1).clamp(min=1e-8)
+            log_importance_weights = seq_weight.unsqueeze(-1)
+            log_importance_weights = torch.clamp(log_importance_weights, max=10.0)
+            ratios = torch.exp(log_importance_weights)
+        elif loss_type == "gspo_token":
+            log_ratio = group_current_scores - group_old_scores
+            log_ratio = torch.clamp(log_ratio, max=10.0)
+            completion_mask = group_ids[:, 1:] != tokenizer.pad_token_id
+            seq_weight = (log_ratio * completion_mask).sum(-1) / completion_mask.sum(-1).clamp(min=1e-8)
+            log_importance_weights = seq_weight.detach().unsqueeze(-1) + (group_current_scores - group_current_scores.detach())
+            log_importance_weights = torch.clamp(log_importance_weights, max=10.0)
+            ratios = torch.exp(log_importance_weights)
+
 
         # Compute the clipped ratios
         clipped_ratios = torch.clamp(
-            ratios, min=1.0 - epsilon, max=1.0 + epsilon
+            ratios, min= 1.0 - lower_epsilon, max= 1.0 + higher_epsilon
         )
 
         # Compute kullback-leibler divergence between reference and current policy
-        kl = (
-            torch.exp(group_reference_scores - group_current_scores)
-            - (group_reference_scores - group_current_scores)
-            - 1
-        )
-        kls[idx] = kl.mean()
-
-        # Compute mean loss of the group
-        completion_mask = group_ids[:, 1:] != tokenizer.pad_token_id
-        loss = (
-            torch.min(
-                ratios * advantages.unsqueeze(-1),
-                clipped_ratios * advantages.unsqueeze(-1),
+        if group_reference_scores is not None:
+            kl = (
+                torch.exp(group_reference_scores - group_current_scores)
+                - (group_reference_scores - group_current_scores)
+                - 1
             )
-            - beta * kl
-        )
-        loss = -(loss * completion_mask).sum() / completion_mask.sum()
-        losses[idx] = loss
+            kls[idx] = kl.mean()
+        else:
+            kl = 0
+            kls[idx] = 0
+        
+        if group_reference_scores is not None:
+            loss = (
+                torch.min(
+                    ratios * advantages.unsqueeze(-1),
+                    clipped_ratios * advantages.unsqueeze(-1),
+                )
+                - beta * kl
+            )
+            
+            # Compute mean loss of the group
+            completion_mask = group_ids[:, 1:] != tokenizer.pad_token_id
+            loss = -(loss * completion_mask).sum() / completion_mask.sum()
+            losses[idx] = loss
+        else:
+            loss = (
+                torch.min(
+                    ratios * advantages.unsqueeze(-1),
+                    clipped_ratios * advantages.unsqueeze(-1),
+                )
+            )
+            completion_mask = group_ids[:, 1:] != tokenizer.pad_token_id
+            loss = -(loss * completion_mask).sum() / completion_mask.sum()
+            losses[idx] = loss
 
     return GRPOOutput(
         loss=losses.mean(),
@@ -469,9 +522,12 @@ class DataModule(pl.LightningDataModule):
         )
 
         if self.training_args.debug is False:
-            self.train_dataset = self.dataset["train"]
-            self.val_dataset = self.dataset["validation"]
-            self.test_dataset = self.dataset["test"]
+            # self.train_dataset = self.dataset["train"]
+            # self.val_dataset = self.dataset["validation"]
+            # self.test_dataset = self.dataset["test"]
+            self.train_dataset = self.dataset["train"].select(range(1000))
+            self.val_dataset = self.dataset["validation"].select(range(100))
+            self.test_dataset = self.dataset["test"].select(range(100))
         else:
             ## 为了测试方便，10000条
             self.train_dataset = self.dataset["train"].select(range(1000))
@@ -572,10 +628,13 @@ class ModelModule(pl.LightningModule):
     def get_model(self):
         ## 导入模型
         model = load_model(self.training_args.model_name)
-        reference_model = deepcopy(model)
-        reference_model.eval()
-        for name, param in reference_model.named_parameters():
-            param.requires_grad = False
+        if self.training_args.grpo_beta != 0:
+            reference_model = deepcopy(model)
+            reference_model.eval()
+            for name, param in reference_model.named_parameters():
+                param.requires_grad = False
+        else:
+            reference_model = None
         if self.training_args.use_lora:
             ## ref:https://www.kaggle.com/code/aayushg1/lora-bart/notebook
             peft_config = LoraConfig(
@@ -613,8 +672,6 @@ class ModelModule(pl.LightningModule):
                 break
             else:
                 temp_i = temp_i + 1
-
-
 
         # Prepare the batch data
         input_ids = batch["input_ids"]
@@ -670,16 +727,19 @@ class ModelModule(pl.LightningModule):
         )
         self.model.train()
 
-        with torch.inference_mode():
-            reference_scores = compute_token_scores(
-                self.reference_model,
-                encoder_input_ids=repeated_input_ids,
-                encoder_attention_mask=repeated_attention_mask,
-                decoder_input_ids=generated_ids,
-                decoder_attention_mask=decoder_attention_mask,
-                batch_size=effective_batch_size,
-                group_size=self.training_args.group_size,
-            ).detach() 
+        if self.training_args.grpo_beta != 0:
+            with torch.inference_mode():
+                reference_scores = compute_token_scores(
+                    self.reference_model,
+                    encoder_input_ids=repeated_input_ids,
+                    encoder_attention_mask=repeated_attention_mask,
+                    decoder_input_ids=generated_ids,
+                    decoder_attention_mask=decoder_attention_mask,
+                    batch_size=effective_batch_size,
+                    group_size=self.training_args.group_size,
+                ).detach() 
+        else:
+            reference_scores = None
         
         # Group the generated ids (batch_size, group_size, output_length)
         generated_ids = generated_ids.view(
@@ -701,8 +761,10 @@ class ModelModule(pl.LightningModule):
             reference_scores,
             labels,
             self.tokenizer,
-            self.training_args.grpo_epsilon,
+            self.training_args.grpo_lower_epsilon,
+            self.training_args.grpo_higher_epsilon,
             self.training_args.grpo_beta,
+            self.training_args.loss_type,
         )
         self.log('train/loss', grpo_output.loss, prog_bar=True)
         self.log('train/reward', grpo_output.reward, prog_bar=True)
@@ -857,25 +919,27 @@ def main():
         max_new_tokens=128,
         max_document_length=512,
         max_summary_length=128,
-        grpo_epsilon=0.1,
-        grpo_beta=0.04,
+        grpo_lower_epsilon=3e-4,
+        grpo_higher_epsilon=4e-4,
+        grpo_beta=0.00,
         gradient_max_norm=0.2,
         save_steps=100,
         scheduler="linear",
-        save_dir="./outputs/grpo_ainize_bart-base-cnn_no_lora",
-        debug=True,
+        save_dir="./outputs/grpo_ainize_bart-base-cnn_gspo_token_v2",
+        debug=False,
         eval_per_epoch=1,#每1轮测试一次
         gradient_accumulation_steps=1,
         max_grad_norm=0.1,
         precision='bf16',#"bf16训练"
         gpus=2,
-        load_path="./outputs/grpo_ainize_bart-base-cnn_no_lora/checkpoints/best.ckpt",
+        load_path="./outputs/grpo_ainize_bart-base-cnn_gspo_token_v2/checkpoints/best.ckpt",
         do_train=False,
         do_valid=True,
         do_test=True,
         resume=False,
         warmup_ratio=0.02,
-        use_lora=True
+        use_lora=True,
+        loss_type = "gspo_token"
     )
 
     ## 单卡单线程调试

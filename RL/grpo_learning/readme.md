@@ -105,10 +105,14 @@ ref： [The Hundred-Page Language Models Book:GitHub](https://github.com/aburkov
 |-----------|-------------|-----------|------------|
 | ORI       | 0.300       | 0.283     | 0.290      |
 | SFT(LORA) | 0.323       | 0.283     | 0.300      |
-| GRPO+LORA | 0.304       | 0.287     | 0.298      |
-| GRPO      | 0.306       | 0.286     | 0.300      |
-
-唯一能确定的就是比原始的模型效果好
+| GRPO+LORA (beta=0.1) | 0.304       | 0.287     | 0.298      |
+| GRPO (beta=0.1)      | 0.306       | 0.286     | 0.300      |
+| GRPO+LORA (beta=0) |        | 0.298     | 0.312      |
+| GSPO+LORA (beta=0, eps=0.1) |        |  0.324     |  0.319      |
+| GSPO(token)+LORA (beta=0, eps=0.1) |        |  0.324     |  0.321      |
+| GSPO(token)+LORA (beta=0, eps=0.1, eps=3e-4) |        |  0.295     |  0.304      |
+> epoch = 20
+~~唯一能确定的就是比原始的模型效果好~~
 
 TODO: 后续增加数据集继续验证，或者构造思维链的数据集/使用思维链的模型继续验证
 > ref:https://arxiv.org/html/2309.13182v2
