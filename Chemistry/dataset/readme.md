@@ -60,3 +60,9 @@ usearch-molecules:https://ashvardanian.com/posts/usearch-molecules/#exploring-di
 ```md
 https://github.com/ipqa-research/ugropy
 ```
+
+## PubChem
+```bash
+wget "ftp://ftp.ncbi.nlm.nih.gov/pubchem/Compound/CURRENT-Full/SDF/*.sdf.gz"
+``` 
+> ref:https://macinchem.org/2025/02/17/searching-a-local-copy-of-pubchem/
