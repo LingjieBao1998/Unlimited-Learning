@@ -130,9 +130,43 @@ docker info
 
 有些镜像源会经常失效或者不可用，推荐使用下面的镜像源
 **常用镜像源（推荐）**
+<table><thead><tr><th>DockerHub 镜像仓库</th><th>是否正常</th></tr></thead><tbody><tr><td><code>docker.m.daocloud.io</code></td><td>正常</td></tr><tr><td><code>ccr.ccs.tencentyun.com</code></td><td>正常</td></tr><tr><td><code>docker.1ms.run</code></td><td>正常</td></tr><tr><td><code>hub.xdark.top</code></td><td>正常</td></tr><tr><td><code>dhub.kubesre.xyz</code></td><td>正常</td></tr><tr><td><code>docker.kejilion.pro</code></td><td>正常</td></tr><tr><td><code>docker.xuanyuan.me</code></td><td>正常</td></tr><tr><td><code>docker.hlmirror.com</code></td><td>正常</td></tr><tr><td><code>run-docker.cn</code></td><td>正常</td></tr><tr><td><code>docker.sunzishaokao.com</code></td><td>正常</td></tr><tr><td><code>image.cloudlayer.icu</code></td><td>正常</td></tr><tr><td><code>docker-0.unsee.tech</code></td><td>正常</td></tr><tr><td><code>docker.tbedu.top</code></td><td>正常</td></tr><tr><td><code>hub.crdz.gq</code></td><td>正常</td></tr><tr><td><code>docker.melikeme.cn</code></td><td>正常</td></tr></tbody></table>
+
 https://www.coderjia.cn/archives/dba3f94c-a021-468a-8ac6-e840f85867ea
 
 ref: https://blog.csdn.net/Lichen0196/article/details/137355517
+
+> 为了防止网站失效，所以copy了一下
+
+### 配置方式1：临时使用
+```bash
+docker pull docker-0.unsee.tech/istio/distroless
+```
+> 将镜像网址添加到你需要拉取的镜像名的前面
+### 配置方式2：长久有效
+修改文件 /etc/docker/daemon.json（如果不存在则需要创建创建，注意不要写入中文，要带 https://），并重启服务。
+```bash
+# 创建目录
+sudo mkdir -p /etc/docker
+# 写入配置文件
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+    "registry-mirrors": [
+    	"https://docker-0.unsee.tech",
+        "https://docker-cf.registry.cyou",
+        "https://docker.1panel.live"
+    ]
+}
+EOF
+# 重启docker服务
+sudo systemctl daemon-reload && sudo systemctl restart docker
+
+# 检查是否成功
+docker pull docker-.unsee.tech/hello-world
+# 或者
+ping -c 3 docker-0.unsee.tech
+```
+
 
 ## 自动清理 Docker 占用的磁盘空间
 ```bash
