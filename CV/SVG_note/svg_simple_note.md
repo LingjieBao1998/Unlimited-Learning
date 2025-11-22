@@ -592,7 +592,7 @@ text2svg(info)
 </g></svg>
 
 > * `font-weight`: 控制字体粗细, `normal`（默认）、`bold`（加粗）、`bolder`、`lighter`、`100~900`（数值越大力度越大）	
-> * `font-style`: 控制字体是否倾斜, `normal`（默认）、`italic`（斜体）、`oblique`（倾斜，类似斜体但更依赖字体支持）	
+> * `font-style`: 控制字体是否倾斜, `normal`（默认）、`italic`（斜体）、`oblique`（倾斜，类似斜体但更依赖字体支持）
 
 
 ## reference
